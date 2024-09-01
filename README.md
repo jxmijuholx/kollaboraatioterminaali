@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Kollaboraatioterminaali** is a terminal-based Pong game designed for two players to enjoy a classic game of Pong through SSH. This project provides a unique way to play multiplayer games directly in the terminal, utilizing modern web technologies and a robust backend.
+**Kollaboraatioterminaali** is a terminal-based Pong game designed for two players to enjoy a classic game of Pong through web-sockets. This project provides a unique way to play multiplayer games directly in the terminal, utilizing modern web technologies and a robust backend.
 
 ## For who
 
@@ -10,21 +10,20 @@ This game is for gamers stuck in a queue with a friend! So whenever you queue up
 
 ## Features
 
-- **Terminal-Based Gameplay**: Experience Pong in a terminal environment, ideal for SSH sessions.
+- **Terminal-Based Gameplay**: Experience Pong in a terminal environment.
 - **Real-Time Multiplayer**: Connect with a friend and play against each other in real-time.
 - **Simple Setup**: Join a game by copying and pasting a single command into your terminal.
-- **Cross-Platform**: Play the game from any terminal that supports SSH.
+- **Cross-Platform**: Play the game from any terminal.
 
 ## Technologies
 
 - **Backend**: 
   - **TypeScript**: For server-side logic and handling game sessions.
   - **Node.js**: Provides the runtime for executing JavaScript/TypeScript code.
-  - **Blessed**: For creating a user interface within the terminal.
   - **Express**: Web framework used for handling HTTP requests and serving the game.
 
 - **Game Mechanics**: 
-  - **Java**: Implements the core game logic and mechanics.
+  - **Java**: Implements the core game logic and mechanics + the UI
 
 - **Frontend**: 
   - **React**: Provides a web interface for generating the game connection command and managing user sessions.
