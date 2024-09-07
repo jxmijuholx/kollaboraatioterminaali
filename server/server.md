@@ -1,9 +1,14 @@
-# Server
+# Backend for a multiplayer pong game
 
-## Node
+## Technologies:
 
-## Express
+- VanillaJS
+- Node
+- Express
+- ws
 
-## TypeScript
+## Usage
 
-## WebSockets with ws
+´´´
+Go into the server folder and run the command "npm run dev"
+´´´
