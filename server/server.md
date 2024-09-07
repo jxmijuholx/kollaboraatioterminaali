@@ -9,6 +9,6 @@
 
 ## Usage
 
-´´´
+```
 Go into the server folder and run the command "npm run dev"
-´´´
+```
