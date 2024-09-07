@@ -6,6 +6,4 @@
 
 ## TypeScript
 
-## https://socket.io/ 
-
-## MongoDB
+## WebSockets with ws
