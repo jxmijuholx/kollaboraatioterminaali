@@ -1,6 +1,7 @@
 import './App.css';
 import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField } from '@mui/material';
 import { useState } from 'react';
+import { createGame, joinGame, webSocket } from './Components/serverHandler';
 
 function App() {
 
@@ -26,7 +27,7 @@ function App() {
         open={open}
         autoHideDuration={5000}
         onClose={handleClose}
-        message="TODO: you lazy mf"
+        message="TODO: implement index.html"
         action={handleClose}
       />
 
