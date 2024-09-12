@@ -1,6 +1,9 @@
 import './App.css';
 import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem, getFormControlLabelUtilityClasses } from '@mui/material';
 import { useState, useEffect } from 'react';
+import AddIcon from "@mui/icons-material/Add"
+import SmartToyIcon from "@mui/icons-material/SmartToy"
+import LinkIcon from "@mui/icons-material/Link"
 
 function App() {
 
@@ -54,7 +57,7 @@ function App() {
     setWs(newWs);
 
     return () => {
-      if (newWs) {
+      if (!clientId) {
         newWs.close();
       }
     };
@@ -114,7 +117,7 @@ function App() {
         open={open}
         autoHideDuration={5000}
         onClose={handleClose}
-        message="TODO: implement functionality lazy mf"
+        message="Implement functionality"
       />
 
       <Grid2 container spacing={3}>
@@ -124,7 +127,7 @@ function App() {
               <Typography variant='h5'>Create game</Typography>
               <Typography variant='body1' style={{ marginTop: 15 }}>Create a new game and give the generated game ID to a player to let them join.</Typography>
               {newGameId ? <Typography>Created game with ID: {newGameId}</Typography> : <Typography style={{ marginTop: 71 }}></Typography>}
-              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 15 }}>New game</Button>
+              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 15 }}>New game <AddIcon /> </Button>
             </CardContent>
           </Card>
         </Grid2>
@@ -140,7 +143,7 @@ function App() {
                 value={gameID}
                 onChange={(e) => setGameID(e.target.value)}
               />
-              <Button onClick={joinGame} color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game</Button>
+              <Button onClick={joinGame} color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
             </CardContent>
           </Card>
         </Grid2>
@@ -165,7 +168,7 @@ function App() {
                   <MenuItem value={40}>Impossible, Good Luck!</MenuItem>
                 </Select>
               </FormControl>
-              <Button onClick={handleOpen} color='success' variant='contained' style={{ marginTop: 15 }}>Play locally</Button>
+              <Button onClick={handleOpen} color='success' variant='contained' style={{ marginTop: 15 }}>Play locally <SmartToyIcon /> </Button>
             </CardContent>
           </Card>
         </Grid2>
