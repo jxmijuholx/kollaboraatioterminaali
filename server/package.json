@@ -1,0 +1,21 @@
+{
+  "name": "pong_backend",
+  "version": "1.0.0",
+  "description": "websocket server for a multiplayer pong game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "uuid": "^10.0.0",
+    "websocket": "^1.0.35"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

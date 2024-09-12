@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client for test purposes</title>
+</head>
+<body>
+    <h1>Test WebSocket Client for Pong game</h1>
+    <p>Open the console to see the messages received from the server.</p>
+
+    <button id="buttonCreate">New Game</button>
+    <button id="buttonJoin">Join a game</button>
+    <input type="text" id="txtgameID" placeholder="Enter Game ID">
+    <div id="divPlayers"></div>
+
+    <script>
+        let clientID = null;
+        let gameID = null;
+        let playerSide = null;
+        let ws = new WebSocket('ws://localhost:8080');
+
+        const buttonCreate = document.getElementById('buttonCreate');
+        const buttonJoin = document.getElementById('buttonJoin');
+        const txtgameID = document.getElementById('txtgameID');
+        const divPlayers = document.getElementById("divPlayers");
+
+        buttonCreate.addEventListener('click', () => {
+            const payload = {
+                "action": "create",
+                "clientID": clientID
+            };
+            ws.send(JSON.stringify(payload));
+        });
+
+        buttonJoin.addEventListener('click', () => {
+            gameID = txtgameID.value;
+            const payload = {
+                "action": "join",
+                "clientID": clientID,
+                "gameID": gameID
+            };
+            ws.send(JSON.stringify(payload));
+        });
+
+        ws.onmessage = message => {
+            const response = JSON.parse(message.data);
+            console.log('Received message:', message.data);
+
+            if (response.action === 'connect') {
+                clientID = response.clientID;
+                console.log('Connected to server:', clientID);
+            }
+
+            if (response.action === 'create') {
+                gameID = response.game.id;
+                console.log("Game created with ID " + gameID);
+            }
+
+            if (response.action === 'join') {
+                const game = response.game;
+
+                // Clear player list
+                while (divPlayers.firstChild) {
+                    divPlayers.removeChild(divPlayers.firstChild);
+                }
+
+                // Add players to the div
+                game.clients.forEach(player => {
+                    const d = document.createElement("div");
+                    d.textContent = player.clientID + " - " + player.paddle;
+                    divPlayers.appendChild(d);
+
+                    if (player.clientID === clientID) {
+                        playerSide = player.paddle;
+                    }
+                });
+            }
+
+            if (response.action === 'error') {
+                console.log('Error:', response.message);
+            }
+        };
+    </script>
+</body>
+</html>
