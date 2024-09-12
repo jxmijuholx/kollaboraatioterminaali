@@ -10,11 +10,11 @@ function App() {
   const [playerSide, setPlayerSide] = useState(null);
   const [open, setOpen] = useState(false);
   const [gameID, setGameID] = useState("");
+  const [newGameId, setNewGameId] = useState(null);
   const [difficulty, setDifficulty] = useState("");
 
   useEffect(() => {
     const newWs = new WebSocket("ws://localhost:8080");
-    setWs(newWs);
 
     newWs.onmessage = (message) => {
       const response = JSON.parse(message.data)
@@ -25,11 +25,13 @@ function App() {
         case "connect":
           setClientId(response.clientID);
           console.log("connected to: ", response.clientID);
+          localStorage.setItem("clientId", response.clientID);
           break;
 
         case "create":
-          setGameID(response.game.id);
+          setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
+          localStorage.setItem("game id", response.game.id)
           break;
 
         case "join":
@@ -49,8 +51,14 @@ function App() {
       }
     };
 
-    return () => newWs.close();
-  }, [clientId]);
+    setWs(newWs);
+
+    return () => {
+      if (newWs) {
+        newWs.close();
+      }
+    };
+  }, []);
 
   const createGame = () => {
     if (ws && clientId) {
@@ -115,7 +123,8 @@ function App() {
             <CardContent>
               <Typography variant='h5'>Create game</Typography>
               <Typography variant='body1' style={{ marginTop: 15 }}>Create a new game and give the generated game ID to a player to let them join.</Typography>
-              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 86 }}>New game</Button>
+              {newGameId ? <Typography>Created game with ID: {newGameId}</Typography> : <Typography style={{ marginTop: 71 }}></Typography>}
+              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 15 }}>New game</Button>
             </CardContent>
           </Card>
         </Grid2>
