@@ -42,9 +42,9 @@ function App() {
           const game = response.game;
           setPlayers(game.clients);
 
-          game.clients.forEach((players) => {
-            if (players.clientID === clientId) {
-              setPlayerSide(players.paddle);
+          game.clients.forEach((player) => {
+            if (player.clientID === clientId) {
+              setPlayerSide(player.paddle);
             }
           });
           break;
