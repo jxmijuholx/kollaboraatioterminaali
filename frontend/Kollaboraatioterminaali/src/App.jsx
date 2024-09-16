@@ -12,6 +12,7 @@ function App() {
   const [players, setPlayers] = useState([]);
   const [playerSide, setPlayerSide] = useState(null);
   const [open, setOpen] = useState(false);
+  const [lobbyOpen, setLobbyOpen] = useState(false);
   const [gameID, setGameID] = useState("");
   const [newGameId, setNewGameId] = useState(null);
   const [difficulty, setDifficulty] = useState("");
@@ -41,9 +42,9 @@ function App() {
           const game = response.game;
           setPlayers(game.clients);
 
-          game.clients.forEach((player) => {
-            if (player.clientID === clientId) {
-              setPlayerSide(player.paddle);
+          game.clients.forEach((players) => {
+            if (players.clientID === clientId) {
+              setPlayerSide(players.paddle);
             }
           });
           break;
@@ -88,8 +89,13 @@ function App() {
     setOpen(true);
   };
 
+  const handleLobbyOpen = () => {
+    setLobbyOpen(true)
+  };
+
   const handleClose = () => {
     setOpen(false)
+    setLobbyOpen(false)
   };
 
   const handleDifficultyChange = (event) => {
@@ -117,7 +123,14 @@ function App() {
         open={open}
         autoHideDuration={5000}
         onClose={handleClose}
-        message="Implement functionality"
+        message={"Implement functionality"}
+      />
+
+      <Snackbar
+        open={lobbyOpen}
+        autoHideDuration={3000}
+        onClose={handleClose}
+        message={gameID ? "Joined lobby: " + gameID : "Enter game ID!"}
       />
 
       <Grid2 container spacing={3}>
@@ -143,7 +156,11 @@ function App() {
                 value={gameID}
                 onChange={(e) => setGameID(e.target.value)}
               />
-              <Button onClick={joinGame} color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
+              <Button onClick={() => {
+                joinGame(),
+                  handleLobbyOpen()
+              }}
+                color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
             </CardContent>
           </Card>
         </Grid2>
@@ -173,6 +190,11 @@ function App() {
           </Card>
         </Grid2>
       </Grid2>
+      <div className='lobbyparagraph'>
+        <p>Lobby:</p>
+        <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
+          : "No players in lobby yet"}</p>
+      </div>
       <div className='footer'>
         <footer>
           <p>

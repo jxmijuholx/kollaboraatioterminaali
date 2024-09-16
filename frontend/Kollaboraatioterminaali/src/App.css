@@ -32,3 +32,9 @@
   font-size: 16;
   margin-left: 16;
 }
+
+.lobbyparagraph {
+  color: white;
+  font-size: medium;
+  font-weight: bold;
+}
