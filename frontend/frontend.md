@@ -1,5 +1,2 @@
 # Front end
-
-## React
-
-## Vite
+Client side code for our pong game 
