@@ -18,12 +18,12 @@ This game is for gamers stuck in a queue with a friend! So whenever you queue up
 ## Technologies
 
 - **Backend**: 
-  - **TypeScript**: For server-side logic and handling game sessions.
+  - **JavaScript**: For server-side logic and handling game sessions.
   - **Node.js**: Provides the runtime for executing JavaScript/TypeScript code.
   - **Express**: Web framework used for handling HTTP requests and serving the game.
 
 - **Game Mechanics**: 
-  - **Java**: Implements the core game logic and mechanics + the UI
+  - **JavaScript**: Implements the core game logic and mechanics + the UI
 
 - **Frontend**: 
   - **React**: Provides a web interface for generating the game connection command and managing user sessions.
@@ -33,13 +33,29 @@ This game is for gamers stuck in a queue with a friend! So whenever you queue up
 ### Prerequisites
 
 - **Node.js**: Ensure you have Node.js installed. [Download Node.js](https://nodejs.org/)
-- **Java**: Make sure Java is installed. [Download Java](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
 
 ### How to play
-1. Open a terminal
-2. Copy the command from our website to your terminal and run it
+1. Open a tthe website
+2. Copy the command from our website to the mini-terminal on the website and run it
 3. Wait for your friend to connect to the server
 4. Start playing!
+
+### For Developers <3
+ ```
+1. 
+git pull https://github.com/jxmijuholx/kollaboraatioterminaali.git
+
+2. 
+cd kollaboraatioterminaali
+
+3. npm install
+
+4. cd server & npm run dev
+
+5. cd ../frontend & npm start
+
+5. Explore the code!
+```
 
 ## Maintainers githubs
 - AbuAk1
