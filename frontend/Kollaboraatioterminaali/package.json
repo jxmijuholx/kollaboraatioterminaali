@@ -14,11 +14,13 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
+    "@xterm/xterm": "^5.5.0",
     "kollaboraatioterminaali": "file:",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2",
-    "react-use-websocket": "^4.8.1"
+    "react-use-websocket": "^4.8.1",
+    "react-xtermjs": "^1.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",

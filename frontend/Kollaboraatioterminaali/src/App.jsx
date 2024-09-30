@@ -7,6 +7,7 @@ import LinkIcon from "@mui/icons-material/Link"
 
 function App() {
 
+  // State variables
   const [clientId, setClientId] = useState(null);
   const [ws, setWs] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -17,31 +18,37 @@ function App() {
   const [newGameId, setNewGameId] = useState(null);
   const [difficulty, setDifficulty] = useState("");
 
+  // Connect to websocket when opening page
   useEffect(() => {
     const newWs = new WebSocket("ws://localhost:8080");
 
+    // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
       const response = JSON.parse(message.data)
       console.log("received message:", message.data)
 
       switch (response.action) {
 
+        // Connect to websocket and set client Id to state variable, store client Id to localstorage 
         case "connect":
           setClientId(response.clientID);
           console.log("connected to: ", response.clientID);
           localStorage.setItem("clientId", response.clientID);
           break;
 
+        // Create new game and set game Id to state variable, store game Id to localstorage
         case "create":
           setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
           localStorage.setItem("game id", response.game.id)
           break;
 
+        //Join game and set clients to players array
         case "join":
           const game = response.game;
           setPlayers(game.clients);
 
+          // Give clients of the game a paddle side and save them to the state variable
           game.clients.forEach((player) => {
             if (player.clientID === clientId) {
               setPlayerSide(player.paddle);
@@ -49,6 +56,7 @@ function App() {
           });
           break;
 
+        // Print error into console if an error happens
         case "error":
           console.log("paska ei toimi error: ", response.message)
           break;
@@ -57,6 +65,7 @@ function App() {
 
     setWs(newWs);
 
+    // Close websocket connection on unmount or if theres no clientId
     return () => {
       if (!clientId) {
         newWs.close();
@@ -64,6 +73,7 @@ function App() {
     };
   }, []);
 
+  // Create new game/lobby
   const createGame = () => {
     if (ws && clientId) {
       const payload = {
@@ -74,6 +84,7 @@ function App() {
     }
   };
 
+  // Join an existing game/lobby
   const joinGame = () => {
     if (clientId && gameID && ws) {
       const payload = {
@@ -85,6 +96,7 @@ function App() {
     }
   };
 
+  // Snackbar handlers
   const handleOpen = () => {
     setOpen(true);
   };
@@ -98,6 +110,7 @@ function App() {
     setLobbyOpen(false)
   };
 
+  // Handle change to difficulty option
   const handleDifficultyChange = (event) => {
     setDifficulty(event.target.value)
   };
@@ -121,7 +134,7 @@ function App() {
 
       <Snackbar
         open={open}
-        autoHideDuration={5000}
+        autoHideDuration={6000}
         onClose={handleClose}
         message={"Implement functionality"}
       />
