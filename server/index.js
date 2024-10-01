@@ -54,6 +54,10 @@ pongWS.on('request', request => {
                 case 'play':
                     playGame(result);
                     break;
+                case 'sendmessage': //Terminaalin sendMessagefunktio mätsää tähän
+                    handleMessages(result);
+                    break;
+                
                 default:
                     throw new Error("En tajunnu tätä: " + result.action);
             }
@@ -203,21 +207,79 @@ function playGame(result) {
 }
 
 // Function to update game state periodically
-function updateGameState() {
+function updateGameState() {    
     try {
         for (const gameID of Object.keys(games)) {
             const game = games[gameID];
+
+            //Lisäys tähän functioon, muuten sama
+            // Luodaan uusi objekti, joka sisältää vain tarvittavat tiedot -> tällä sain lisättyä viestit mukaan ettei tämä looppi katkea kun laitetaan viestiä
+            const gameState = {
+                id: game.id,
+                clients: game.clients,
+                state: game.state
+            };
+            // 
+
             const payload = {
                 "action": "update",
-                "game": game
+                "game": gameState
             };
 
             game.clients.forEach(c => {
                 clients[c.clientID].connection.send(JSON.stringify(payload));
             });
         }
-        setTimeout(updateGameState, 500);
+        setTimeout(updateGameState, 50);
     } catch (error) {
         console.error('Pelin tilan päivittäminen ei onnannu :/:', error.message);
+    }
+}
+
+//Funktio viestin lähettämiselle ja vastaan ottamiselle -> alkaa kun toinen lähettää viestin ja välittää toiselle 
+function handleMessages(result) {
+    try {
+        const gameID = result.gameID;
+        const clientID = result.clientID;
+
+        if (!gameID || !clientID) {
+            throw new Error("Puuttuu joko peli id tai client id.");
+        }
+
+        const game = games[gameID];
+        if (!game) {
+            throw new Error("Peliä ei löytynyt");
+        }
+
+        if (result.action === 'sendmessage') {
+            const content = result.content;
+
+            if (!content) {
+                throw new Error("Viestin sisältö puuttuu??.");
+            }
+
+            const message = {
+                action: 'message',
+                from: clientID,
+                content: content
+            };
+
+            // Tallennetaan viesti pelin viestihistoriaan -> katsotaan onko mitään hyötyä vai tuleeko ongelmia tilan kanssa
+            game.messageHistory = game.messageHistory || [];
+            game.messageHistory.push(message);
+
+            // Lähetetään viesti kaikille pelin pelaajille -> Terminaalielementissä manusti poistettu "oma viesti" eli terminaali ei nyt hae
+            game.clients.forEach(c => {
+                if (clients[c.clientID] && clients[c.clientID].connection) {
+                    clients[c.clientID].connection.send(JSON.stringify(message));
+                }
+            });
+
+            console.log(`Lähetetetyn viestin sisältö, tulee molemmille: ${content}`);
+        
+        }
+        
+    } catch (error) {
+        console.error('Viestien käsittelyssä tapahtui virhe:', error.message);
     }
 }
