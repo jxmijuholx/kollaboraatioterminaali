@@ -57,7 +57,7 @@ pongWS.on('request', request => {
                 case 'sendmessage': //Terminaalin sendMessagefunktio mätsää tähän
                     handleMessages(result);
                     break;
-                
+
                 default:
                     throw new Error("En tajunnu tätä: " + result.action);
             }
@@ -207,7 +207,7 @@ function playGame(result) {
 }
 
 // Function to update game state periodically
-function updateGameState() {    
+function updateGameState() {
     try {
         for (const gameID of Object.keys(games)) {
             const game = games[gameID];
@@ -276,9 +276,20 @@ function handleMessages(result) {
             });
 
             console.log(`Lähetetetyn viestin sisältö, tulee molemmille: ${content}`);
-        
+
         }
-        
+        //Ei ollut turhaposita...lol
+        else if (result.action === "getmessages") {
+            const messageHistory = game.messageHistory || [];
+            const payload = {
+                action: 'getmessages',
+                from: clientID,
+                messages: messageHistory
+            };
+            clients[clientID].connection.send(JSON.stringify(payload));
+            console.log(`historiasta peli ${gameID} pelaajalle ${clientID}, homma toimii`);
+        }
+
     } catch (error) {
         console.error('Viestien käsittelyssä tapahtui virhe:', error.message);
     }
