@@ -1,7 +1,7 @@
 import '../App.css';
 import { AppBar, Typography, Button, TextField, Box } from '@mui/material';
 import { useState } from 'react';
-import { json, Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
 
@@ -11,11 +11,13 @@ import LoginIcon from '@mui/icons-material/Login';
 
 function Home() {
 
+    // State variables
     const [loggedIn, setLoggedIn] = useState(false);
     const [loginOpen, setLoginOpen] = useState(false);
     const [registerOpen, setRegisterOpen] = useState(false);
     const [username, setUsername] = useState("");
 
+    // Arrays for random display name generation
     const words = [
         "ocean",
         "mountain",
@@ -72,11 +74,13 @@ function Home() {
     const loginLink = 'http://localhost:8080/auth/login'
     const registerLink = 'http://localhost:8080/auth/register'
 
+    // Dialog handler
     const handleOpenRegister = () => {
         setLoginOpen(false);
         setRegisterOpen(true);
     };
 
+    // Log in to an existing account
     const handleLogin = async (username, password) => {
         const loginData = {
             username,
@@ -106,7 +110,8 @@ function Home() {
         }
     };
 
-    const handleRegister = async (password, username) => {
+    // Register a new user
+    const handleRegister = async (username, password) => {
         const registerData = {
             username,
             password
@@ -135,6 +140,7 @@ function Home() {
         }
     };
 
+    // Log user out by deleting localstorage content
     const handleLogout = () => {
         localStorage.removeItem('jwt-token');
         localStorage.removeItem('username')
@@ -144,16 +150,17 @@ function Home() {
         setUsername("");
     };
 
+    // Generate a random display name for the user
     const generateName = () => {
         const random = adjectives[Math.floor(Math.random() * adjectives.length)] + "-" + words[Math.floor(Math.random() * words.length)]
         setUsername(random)
     };
 
-    // Check for username before navigating
-    const usernameCheck = (event) => {
-        if (!username) {
+    // Check if user is logged in before letting them access play page
+    const loginCheck = (event) => {
+        if (!username || loggedIn === false) {
             event.preventDefault();
-            alert("Please select a username before playing!")
+            alert("Please log in before playing.")
         } else {
             localStorage.setItem("username", username)
         }
@@ -198,7 +205,11 @@ function Home() {
                         justifyContent={'center'}
                         sx={{ border: 3, padding: 5, borderRadius: 2, width: '300px', margin: 'auto' }}>
 
-                        <Typography variant="h6" sx={{ marginBottom: 2 }}>{username ? username : "Choose username!"}</Typography>
+                        <Typography
+                            variant="h6"
+                            sx={{ marginBottom: 2 }}>
+                            {username ? "Welcome " + username + "!" : "Choose username!"}
+                        </Typography>
                         <TextField
                             label='Type username...'
                             value={username}
@@ -216,7 +227,7 @@ function Home() {
                                 <AutorenewIcon />
                             </Button>
                             <Link
-                                onClick={usernameCheck}
+                                onClick={loginCheck}
                                 to='/play'>
                                 <Button
                                     variant='contained'
@@ -236,7 +247,7 @@ function Home() {
                         <Box sx={{ border: 3, borderRadius: 2, width: '45%', padding: 2 }}>
                             <Typography variant='h4'>How to play?</Typography>
                             <Typography variant='h6' >
-                                {`Start playing by choosing a username or generate a random name with the "random name" button
+                                {`Start playing by creating an account and choosing a display name orgenerate a random display name with the "random name" button
                             and then click start playing to navigate to the game setup menu!
   
                             Once in the game setup menu you can create a game or join an existing game by inserting a join code 
@@ -249,7 +260,13 @@ function Home() {
                             </Typography>
                         </Box>
 
-                        <Box sx={{ border: 3, borderRadius: 2, width: '45%', padding: 2 }}>
+                        <Box sx={{
+                            border: 3,
+                            borderRadius: 2,
+                            width: '45%',
+                            padding: 2
+                        }}
+                        >
                             <Typography variant='h4'>About collaboration terminal:</Typography>
                             <Typography variant='h6'>
                                 {`Collaboration terminal is a terminal-based Pong game designed for two players to enjoy a classic game of Pong through web-sockets.
