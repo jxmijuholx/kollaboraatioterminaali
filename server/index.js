@@ -15,9 +15,9 @@ httpServer.listen(8080, () => {
 });
 
 // HashMaps for clients AKA PLAYERS IN SERVER
-const clients = {};
+const clients = new Map();
 // HashMaps for games AKA ROOMS IN SERVER
-const games = {};
+const games = new Map();
 
 const pongWS = new webSocketServer({
     "httpServer": httpServer
@@ -53,6 +53,9 @@ pongWS.on('request', request => {
                     break;
                 case 'play':
                     playGame(result);
+                    break;
+                case 'move':
+                    movePaddle(result);
                     break;
                 case 'sendmessage': //Terminaalin sendMessagefunktio mätsää tähän
                     handleMessages(result);
@@ -292,5 +295,52 @@ function handleMessages(result) {
 
     } catch (error) {
         console.error('Viestien käsittelyssä tapahtui virhe:', error.message);
+    }
+}
+
+// Funktio mailan liikuttamiselle -> tarkistaa pelin ja pelaajan tilan ja liikuttaa mailaa ja lähettää mailan position kaikille pelaajille samassa pelissä
+function movePaddle(result) {
+    const { gameID, clientID, direction } = result;
+
+    if (!gameID || !clientID) {
+        throw new Error("Puuttuu joko peli id tai client id.");
+    }
+
+    const game = games[gameID];
+    if (!game) {
+        throw new Error("Peliä ei löytynyt");
+    }
+
+    game.state = game.state || {};
+    game.state[clientID] = game.state[clientID] || { position: 0 };
+
+    if (direction === 'up') {
+        game.state[clientID].position -= 1;
+    } else if (direction === 'down') {
+        game.state[clientID].position += 1;
+    } else {
+        throw new Error("ei voi tietää suunnasta bro");
+    }
+
+    console.log(`Player ${clientID} moved ${direction}. New position: ${game.state[clientID].position}`);
+
+    // broadcastaa pelin tila kaikille pelaajille
+    const payload = {
+        "action": "update",
+        "game": {
+            id: gameID,
+            clients: game.clients,
+            state: game.state
+        }
+    }
+
+    game.clients.forEach(c => {
+        if (clients[c.clientID] && clients[c.clientID].connection) {
+            clients[c.clientID].connection.send(JSON.stringify(payload));
+        }
+    })
+    if (error) {
+        console.error('Virhe mailan liikuttamisessa:', error.message);
+        throw new Error("Virhe mailan liikuttamisessa");
     }
 }
