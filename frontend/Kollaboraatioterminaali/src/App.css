@@ -38,3 +38,17 @@
   font-size: medium;
   font-weight: bold;
 }
+.terminaali {
+  width: 600px;
+  height: 400px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  background-color: #1e1e1e;
+  color: white;
+  font-size: 14px;
+  overflow: auto;
+}
+
+.xterm {
+  text-align: left; /* Siirrä teksti vasemmalle. HUOM! Tämä tämä pois jos peli on päällä*/
+}
