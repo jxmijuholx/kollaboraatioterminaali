@@ -84,6 +84,14 @@ function App() {
           }
           break;
 
+        // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
+        case "update":
+          const gamestate = response.game.state
+          if (gamestate) {
+            console.log(gamestate)
+          }
+          break;
+
         // Print error into console if an error happens
         case "error":
           console.log("paska ei toimi error: ", response.message)
@@ -206,6 +214,31 @@ function App() {
     }
   };
 
+  // move paddle function
+  const movePaddle = (direction) => {
+    if (clientId && gameID && ws && ws.readyState === WebSocket.OPEN) {
+      const payload = {
+        "action": "move",
+        "clientID": clientId,
+        "direction": direction,
+        "gameID": gameID
+      }
+      ws.send(JSON.stringify(payload))
+      console.log("Player: " + clientId + " moved paddle " + direction)
+    }
+  };
+
+  // move player paddle up
+  const moveUp = () => {
+    movePaddle("up")
+  };
+
+  // move player paddle down
+  const moveDown = () => {
+    movePaddle("down")
+  };
+
+
   // Snackbar handlers
   const handleOpen = () => {
     setOpen(true);
@@ -318,7 +351,13 @@ function App() {
         <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
           : "No players in lobby yet"}</p>
         {isTerminalVisible && (
-          <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
+          <div>
+            <div className='movementButtons'>
+              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
+              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
+            </div>
+            <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
+          </div>
         )}
       </div>
       <div className='footer'>
