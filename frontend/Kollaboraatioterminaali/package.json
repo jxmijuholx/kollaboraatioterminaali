@@ -14,6 +14,7 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/material": "^6.1.0",
+    "@xterm/xterm": "^5.5.0",
     "kollaboraatioterminaali": "file:",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

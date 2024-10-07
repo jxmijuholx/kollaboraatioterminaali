@@ -6,11 +6,12 @@ import SmartToyIcon from "@mui/icons-material/SmartToy"
 import LinkIcon from "@mui/icons-material/Link"
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
-import { Terminal } from 'xterm'; 
+import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 
 function App() {
 
+  // State variables
   const [clientId, setClientId] = useState(null);
   const [ws, setWs] = useState(null);
   const [players, setPlayers] = useState([]);
@@ -27,31 +28,37 @@ function App() {
   const term = useRef(null); // terminaali instanssi viite
   const inputBuffer = useRef(''); // terminaalin input bufferi
 
+  // Connect to websocket when opening page
   useEffect(() => {
     const newWs = new WebSocket("ws://localhost:8080");
 
+    // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
       const response = JSON.parse(message.data)
       console.log("received message:", message.data)
 
       switch (response.action) {
 
+        // Connect to websocket and set client Id to state variable, store client Id to localstorage 
         case "connect":
           setClientId(response.clientID);
           console.log("connected to: ", response.clientID);
           localStorage.setItem("clientId", response.clientID);
           break;
 
+        // Create new game and set game Id to state variable, store game Id to localstorage
         case "create":
           setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
           localStorage.setItem("game id", response.game.id)
           break;
 
+        //Join game and set clients to players array
         case "join":
           const game = response.game;
           setPlayers(game.clients);
 
+          // Give clients of the game a paddle side and save them to the state variable
           game.clients.forEach((player) => {
             if (player.clientID === clientId) {
               setPlayerSide(player.paddle);
@@ -59,15 +66,15 @@ function App() {
           });
           setIsTerminalVisible(true);//Kun liityttään niin terminaali tulee näkyviin
           break;
-        
+
         //Bäkkärille
         case "message":
           // nappaa clientID joko react tilasta tai localStoragesta
           const storedClientId = clientId || localStorage.getItem('clientId');
-        
+
           //Tässä custom prompt generointi
           if (term.current && response.from && response.content) {
-            if (response.from !== storedClientId) {  
+            if (response.from !== storedClientId) {
               const senderColor = response.from !== storedClientId ? '\x1b[32m' : '\x1b[34m'; // Vihreä omaan viestiin, sininen kaverilta
               term.current.write(`\r\n${senderColor}${response.from}: ${response.content}\x1b[0m`);
               // Vielä yksi rivivaihto ja sitten prompt
@@ -77,6 +84,15 @@ function App() {
           }
           break;
 
+        // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
+        case "update":
+          const gamestate = response.game.state
+          if (gamestate) {
+            console.log(gamestate)
+          }
+          break;
+
+        // Print error into console if an error happens
         case "error":
           console.log("paska ei toimi error: ", response.message)
           break;
@@ -85,6 +101,7 @@ function App() {
 
     setWs(newWs);
 
+    // Close websocket connection on unmount or if theres no clientId
     return () => {
       if (!clientId) {
         newWs.close();
@@ -95,7 +112,7 @@ function App() {
   //Terminaalin useEffect, 
   useEffect(() => {
     if (isTerminalVisible && !term.current && terminalRef.current) {
-      
+
       //Luonti ja alustavat määritykset
       term.current = new Terminal({
         cursorBlink: true,
@@ -104,34 +121,34 @@ function App() {
         // rightClickSelectsWord: true, // hiiren oikeanappi -> mukaan jos tarvitsee kaataa tai yms.
         convertEol: true // Kursori aina oikeaan laitaan
       });
-  
+
       // Custom prompt luominen
       term.current.open(terminalRef.current);
       term.current.writeln('Welcome to the Kollaboration terminal, try chatting, there is no game yet :3!');
-  
+
       // mukautettu prompt omalla clientID:llä
       term.current.prompt = () => {
         const promptColor = '\x1b[34m'; // sininen
         const promptText = `${promptColor}${clientId}:\x1b[0m $ `; // promt alku
         term.current.write(promptText);
       };
-  
+
       // Näytetään prompt heti, kun terminaali avataan ensimmäisen kerran
       term.current.prompt();
-  
+
       term.current.onData((data) => {
         if (!ws || ws.readyState !== WebSocket.OPEN || !gameID) {
           term.current.writeln("Error: WSocket tai Peli puuttuu.");
           return;
         }
-  
+
         if (data === '\r') { // enter-painallus
           const message = inputBuffer.current.trim();
           if (message) {
             sendMessage(message);
             inputBuffer.current = ''; // tyhjennä syöttö seuraavaa varten
           }
-  
+
           // siirrytään uudelle riville ennen uuden promptin näyttämistä
           term.current.write('\r\n');
           term.current.prompt();
@@ -147,21 +164,21 @@ function App() {
       });
     }
   }, [isTerminalVisible, ws, gameID]);
-  
+
   //lähetä viesti functio
   const sendMessage = (message) => {
     if (!gameID) {
       term.current.writeln('Ei ole huonetta?!.');
       return;
     }
-  
-    
+
+
     if (ws && ws.readyState === WebSocket.OPEN) {
       const payload = {
         action: 'sendmessage',
         gameID: gameID,
         clientID: localStorage.getItem('clientId'),  // Localstorageen muistiin
-        content: message,  
+        content: message,
       };
       // Lähetä viesti ws kautta
       ws.send(JSON.stringify(payload));
@@ -172,8 +189,9 @@ function App() {
       term.current.writeln('Kukaan ei ole vielä liitynyt huoneeseen :C');
     }
   };
-  
 
+
+  // Create new game/lobby
   const createGame = () => {
     if (ws && clientId) {
       const payload = {
@@ -184,6 +202,7 @@ function App() {
     }
   };
 
+  // Join an existing game/lobby
   const joinGame = () => {
     if (clientId && gameID && ws) {
       const payload = {
@@ -195,6 +214,32 @@ function App() {
     }
   };
 
+  // move paddle function
+  const movePaddle = (direction) => {
+    if (clientId && gameID && ws && ws.readyState === WebSocket.OPEN) {
+      const payload = {
+        "action": "move",
+        "clientID": clientId,
+        "direction": direction,
+        "gameID": gameID
+      }
+      ws.send(JSON.stringify(payload))
+      console.log("Player: " + clientId + " moved paddle " + direction)
+    }
+  };
+
+  // move player paddle up
+  const moveUp = () => {
+    movePaddle("up")
+  };
+
+  // move player paddle down
+  const moveDown = () => {
+    movePaddle("down")
+  };
+
+
+  // Snackbar handlers
   const handleOpen = () => {
     setOpen(true);
   };
@@ -208,6 +253,7 @@ function App() {
     setLobbyOpen(false)
   };
 
+  // Handle change to difficulty option
   const handleDifficultyChange = (event) => {
     setDifficulty(event.target.value)
   };
@@ -231,7 +277,7 @@ function App() {
 
       <Snackbar
         open={open}
-        autoHideDuration={5000}
+        autoHideDuration={6000}
         onClose={handleClose}
         message={"Implement functionality"}
       />
@@ -305,7 +351,13 @@ function App() {
         <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
           : "No players in lobby yet"}</p>
         {isTerminalVisible && (
-          <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
+          <div>
+            <div className='movementButtons'>
+              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
+              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
+            </div>
+            <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
+          </div>
         )}
       </div>
       <div className='footer'>
