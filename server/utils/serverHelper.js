@@ -136,7 +136,7 @@ function updateGameState() {
 
 function handleMessages(result) {
     try {
-        const { gameID, clientID, action, content } = result;
+        const { gameID, clientID, action, content, username } = result;
 
         if (!gameID || !clientID) {
             throw new Error("Missing game ID or client ID.");
@@ -155,7 +155,8 @@ function handleMessages(result) {
             const message = {
                 action: 'message',
                 from: clientID,
-                content: content
+                content: content,
+                username: username
             };
 
             game.messageHistory.push(message);
@@ -173,7 +174,7 @@ function handleMessages(result) {
             const messageHistory = game.messageHistory || [];
             const payload = {
                 action: 'getmessages',
-                from: clientID,
+                from: username,
                 messages: messageHistory
             };
 

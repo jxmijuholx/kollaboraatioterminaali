@@ -1,9 +1,12 @@
-import './App.css';
-import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem, getFormControlLabelUtilityClasses } from '@mui/material';
+import '../App.css';
+import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
 import { useState, useEffect, useRef } from 'react';
-import AddIcon from "@mui/icons-material/Add"
-import SmartToyIcon from "@mui/icons-material/SmartToy"
-import LinkIcon from "@mui/icons-material/Link"
+import { Link } from 'react-router-dom';
+import AddIcon from "@mui/icons-material/Add";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import LinkIcon from "@mui/icons-material/Link";
+import Home from "./Home";
+
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
 import { Terminal } from 'xterm';
@@ -21,6 +24,8 @@ function App() {
   const [gameID, setGameID] = useState("");
   const [newGameId, setNewGameId] = useState(null);
   const [difficulty, setDifficulty] = useState("");
+
+  const username = localStorage.getItem('username')
 
   //Terminaalia varten
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);//näytä terminaali
@@ -44,6 +49,7 @@ function App() {
           setClientId(response.clientID);
           console.log("connected to: ", response.clientID);
           localStorage.setItem("clientId", response.clientID);
+          console.log(localStorage.getItem("username"))
           break;
 
         // Create new game and set game Id to state variable, store game Id to localstorage
@@ -76,7 +82,7 @@ function App() {
           if (term.current && response.from && response.content) {
             if (response.from !== storedClientId) {
               const senderColor = response.from !== storedClientId ? '\x1b[32m' : '\x1b[34m'; // Vihreä omaan viestiin, sininen kaverilta
-              term.current.write(`\r\n${senderColor}${response.from}: ${response.content}\x1b[0m`);
+              term.current.write(`\r\n${senderColor} ${response.username}: ${response.content}\x1b[0m`);
               // Vielä yksi rivivaihto ja sitten prompt
               term.current.write('\r\n');
               term.current.prompt();
@@ -85,11 +91,8 @@ function App() {
           break;
 
         // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
-        case "update":
-          const gamestate = response.game.state
-          if (gamestate) {
-            console.log(gamestate)
-          }
+        case "move":
+          console.log("ei toimi")
           break;
 
         // Print error into console if an error happens
@@ -129,7 +132,7 @@ function App() {
       // mukautettu prompt omalla clientID:llä
       term.current.prompt = () => {
         const promptColor = '\x1b[34m'; // sininen
-        const promptText = `${promptColor}${clientId}:\x1b[0m $ `; // promt alku
+        const promptText = `${promptColor} ${username}:\x1b[0m $ `; // promt alku
         term.current.write(promptText);
       };
 
@@ -178,6 +181,7 @@ function App() {
         action: 'sendmessage',
         gameID: gameID,
         clientID: localStorage.getItem('clientId'),  // Localstorageen muistiin
+        username: username,
         content: message,
       };
       // Lähetä viesti ws kautta
@@ -260,20 +264,6 @@ function App() {
 
   return (
     <>
-      <AppBar position='fixed'
-        style={{
-          padding: 15,
-          borderRadius: 10,
-          marginTop: 4,
-          maxWidth: 1272,
-          marginRight: 4,
-          background: "#3a3a3a",
-          color: "white",
-        }}>
-        <Typography variant='h5' >
-          Collaboration terminal (Change name?)
-        </Typography>
-      </AppBar>
 
       <Snackbar
         open={open}
@@ -289,7 +279,9 @@ function App() {
         message={gameID ? "Joined lobby: " + gameID : "Enter game ID!"}
       />
 
-      <Grid2 container spacing={3}>
+      <Link to={'/'}>Back to home</Link>
+
+      <Grid2 container spacing={4}>
         <Grid2 xs={12} sm={6} md={3}>
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
@@ -359,19 +351,6 @@ function App() {
             <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
           </div>
         )}
-      </div>
-      <div className='footer'>
-        <footer>
-          <p>
-            Contributors:
-          </p>
-          <div className='footerLinks'>
-            <a href="https://github.com/AbuAk1"> @AbuAk1 </a>
-            <a href="https://github.com/jxmijuholx"> @jxmijuholx </a>
-            <a href="https://github.com/Santks"> @Santks </a>
-            <a href="https://github.com/Tuutej"> @Tuutej</a>
-          </div>
-        </footer>
       </div>
     </>
   );
