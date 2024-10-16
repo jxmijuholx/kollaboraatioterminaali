@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import AddIcon from "@mui/icons-material/Add";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import LinkIcon from "@mui/icons-material/Link";
-import Home from "./Home";
 
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
@@ -279,9 +278,10 @@ function App() {
         message={gameID ? "Joined lobby: " + gameID : "Enter game ID!"}
       />
 
-      <Link to={'/'}>Back to home</Link>
-
       <Grid2 container spacing={4}>
+        <Grid2>
+          <Link to={'/'}>Back to home</Link>
+        </Grid2>
         <Grid2 xs={12} sm={6} md={3}>
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
