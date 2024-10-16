@@ -4,7 +4,7 @@
   "description": "websocket server for a multiplayer pong game",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
@@ -19,7 +19,8 @@
     "mongoose": "^8.7.1",
     "pong_backend": "file:",
     "uuid": "^10.0.0",
-    "websocket": "^1.0.35"
+    "websocket": "^1.0.35",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
