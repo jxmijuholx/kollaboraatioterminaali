@@ -1,11 +1,19 @@
+require('dotenv').config();
 const express = require('express');
+const {connectDB} = require('./db');
+const authRoutes = require('./routes/authRoute');
 const http = require('http');
 const WebSocketServer = require('websocket').server;
 const { setupWebSocketServer } = require('./websocket');
+
 const app = express();
+connectDB();
+
+app.use(express.json());
+app.use('/auth', authRoutes);
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.send('Tervetuloa pong game API:in!');
 });
 
 const httpServer = http.createServer(app);
