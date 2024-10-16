@@ -174,7 +174,7 @@ function handleMessages(result) {
             const messageHistory = game.messageHistory || [];
             const payload = {
                 action: 'getmessages',
-                from: username,
+                from: clientID,
                 messages: messageHistory
             };
 
