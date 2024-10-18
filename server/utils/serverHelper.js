@@ -128,7 +128,7 @@ function updateGameState() {
                 }
             });
         });
-        setTimeout(updateGameState, 100);
+        setTimeout(updateGameState, 5000);
     } catch (error) {
         console.error('Error updating game state:', error.message);
     }

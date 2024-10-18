@@ -10,6 +10,8 @@ import LinkIcon from "@mui/icons-material/Link";
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
+import GameCanvas from './GameCanvas';
+import ChatTerminal from './ChatTerminal';
 
 function App() {
 
@@ -28,9 +30,7 @@ function App() {
 
   //Terminaalia varten
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);//näytä terminaali
-  const terminalRef = useRef(null); // viitaus terminaali elementiin 
-  const term = useRef(null); // terminaali instanssi viite
-  const inputBuffer = useRef(''); // terminaalin input bufferi
+  const [messages, setMessages] = useState([]); // Tila vastaanotetuille viesteille
 
   // Connect to websocket when opening page
   useEffect(() => {
@@ -72,21 +72,17 @@ function App() {
           setIsTerminalVisible(true);//Kun liityttään niin terminaali tulee näkyviin
           break;
 
-        //Bäkkärille
+           //Bäkkärille
         case "message":
           // nappaa clientID joko react tilasta tai localStoragesta
           const storedClientId = clientId || localStorage.getItem('clientId');
 
-          //Tässä custom prompt generointi
-          if (term.current && response.from && response.content) {
-            if (response.from !== storedClientId) {
-              const senderColor = response.from !== storedClientId ? '\x1b[32m' : '\x1b[34m'; // Vihreä omaan viestiin, sininen kaverilta
-              term.current.write(`\r\n${senderColor} ${response.username}: ${response.content}\x1b[0m`);
-              // Vielä yksi rivivaihto ja sitten prompt
-              term.current.write('\r\n');
-              term.current.prompt();
-            }
-          }
+          if (response.content && response.from) {
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              { from: response.username, content: response.content },
+            ])}
+
           break;
 
         // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
@@ -110,67 +106,12 @@ function App() {
       }
     };
   }, []);
-
-  //Terminaalin useEffect, 
-  useEffect(() => {
-    if (isTerminalVisible && !term.current && terminalRef.current) {
-
-      //Luonti ja alustavat määritykset
-      term.current = new Terminal({
-        cursorBlink: true,
-        rows: 20,
-        cols: 80,
-        // rightClickSelectsWord: true, // hiiren oikeanappi -> mukaan jos tarvitsee kaataa tai yms.
-        convertEol: true // Kursori aina oikeaan laitaan
-      });
-
-      // Custom prompt luominen
-      term.current.open(terminalRef.current);
-      term.current.writeln('Welcome to the Kollaboration terminal, try chatting, there is no game yet :3!');
-
-      // mukautettu prompt omalla clientID:llä
-      term.current.prompt = () => {
-        const promptColor = '\x1b[34m'; // sininen
-        const promptText = `${promptColor} ${username}:\x1b[0m $ `; // promt alku
-        term.current.write(promptText);
-      };
-
-      // Näytetään prompt heti, kun terminaali avataan ensimmäisen kerran
-      term.current.prompt();
-
-      term.current.onData((data) => {
-        if (!ws || ws.readyState !== WebSocket.OPEN || !gameID) {
-          term.current.writeln("Error: WSocket tai Peli puuttuu.");
-          return;
-        }
-
-        if (data === '\r') { // enter-painallus
-          const message = inputBuffer.current.trim();
-          if (message) {
-            sendMessage(message);
-            inputBuffer.current = ''; // tyhjennä syöttö seuraavaa varten
-          }
-
-          // siirrytään uudelle riville ennen uuden promptin näyttämistä
-          term.current.write('\r\n');
-          term.current.prompt();
-        } else if (data === '\u007F') { // takaisinpäin Backspace avulla
-          if (inputBuffer.current.length > 0) {
-            inputBuffer.current = inputBuffer.current.slice(0, -1);
-            term.current.write('\b \b');
-          }
-        } else {
-          inputBuffer.current += data;
-          term.current.write(data);
-        }
-      });
-    }
-  }, [isTerminalVisible, ws, gameID]);
-
+  
   //lähetä viesti functio
   const sendMessage = (message) => {
     if (!gameID) {
-      term.current.writeln('Ei ole huonetta?!.');
+      console.log("ei peliä viestin lähetyksen yhteydessä")
+    //   term.current.writeln('Ei ole huonetta?!.');
       return;
     }
 
@@ -187,10 +128,12 @@ function App() {
       ws.send(JSON.stringify(payload));
 
     } else {
-      term.current.write('\r\n');
-      term.current.write('\b \b');
-      term.current.writeln('Kukaan ei ole vielä liitynyt huoneeseen :C');
+      console.log("error viestin lähetyksesessä")
     }
+  };
+
+  const getMessage = () => {
+    return messages;
   };
 
 
@@ -348,7 +291,10 @@ function App() {
               <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
               <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
             </div>
-            <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
+            <div className='test-components'>
+            <ChatTerminal ws={ws.current} gameID={gameID} username={username} sendMessage={sendMessage} getMessage={getMessage} />
+            <GameCanvas  gameID={gameID} />
+            </div>
           </div>
         )}
       </div>
