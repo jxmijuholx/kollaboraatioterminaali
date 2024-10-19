@@ -8,7 +8,6 @@ import LinkIcon from "@mui/icons-material/Link";
 
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
-import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 import GameCanvas from './GameCanvas';
 import ChatTerminal from './ChatTerminal';
@@ -29,8 +28,12 @@ function App() {
   const username = localStorage.getItem('username')
 
   //Terminaalia varten
+  const [isLobbyVisible, setIsLobbyVisible] = useState(false);
+  const [isGameVisible, setIsGameVisible] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);//näytä terminaali
-  const [messages, setMessages] = useState([]); // Tila vastaanotetuille viesteille
+  const [action, setAction] = useState(null); // Tilanhallinta napin painalluksille
+  const [pelitila, setPelitila] = useState(null)
+  const [viesti, setViesti] = useState("");
 
   // Connect to websocket when opening page
   useEffect(() => {
@@ -69,20 +72,27 @@ function App() {
               setPlayerSide(player.paddle);
             }
           });
+          setIsLobbyVisible(true);
           setIsTerminalVisible(true);//Kun liityttään niin terminaali tulee näkyviin
           break;
 
-           //Bäkkärille
+        // Bäkkärille
         case "message":
-          // nappaa clientID joko react tilasta tai localStoragesta
+          // Nappaa clientID joko React-tilasta tai localStoragesta
           const storedClientId = clientId || localStorage.getItem('clientId');
 
           if (response.content && response.from) {
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              { from: response.username, content: response.content },
-            ])}
+            // Lähetä koko viestiobjekti setViesti-funktioon
+            setViesti({
+              from: response.username,  // Lähettäjän nimi
+              content: response.content // Viestin sisältö
+            });
+          }
+          break;
 
+        case "update":
+          // console.log("Liikettä");
+          setPelitila(response.game);
           break;
 
         // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
@@ -106,12 +116,12 @@ function App() {
       }
     };
   }, []);
-  
+
   //lähetä viesti functio
   const sendMessage = (message) => {
     if (!gameID) {
       console.log("ei peliä viestin lähetyksen yhteydessä")
-    //   term.current.writeln('Ei ole huonetta?!.');
+      //   term.current.writeln('Ei ole huonetta?!.');
       return;
     }
 
@@ -132,8 +142,27 @@ function App() {
     }
   };
 
-  const getMessage = () => {
-    return messages;
+ 
+
+  const exitTerminal = () => {
+    setIsTerminalVisible(false);
+  }
+
+  const handleButtonClick = (actionType) => {
+    setAction(actionType); // Päivitä tila napin painalluksella
+    switch (actionType) {
+      case "play":
+        exitTerminal();
+        setIsGameVisible(true);
+        break;
+      case "chat":
+        setIsTerminalVisible(true);
+        setIsGameVisible(false);
+        break;
+      default:
+        break;
+    }
+
   };
 
 
@@ -285,15 +314,26 @@ function App() {
         <p>Lobby:</p>
         <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
           : "No players in lobby yet"}</p>
-        {isTerminalVisible && (
+        {isLobbyVisible && (
           <div>
             <div className='movementButtons'>
               <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
               <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
             </div>
-            <div className='test-components'>
-            <ChatTerminal ws={ws.current} gameID={gameID} username={username} sendMessage={sendMessage} getMessage={getMessage} />
-            <GameCanvas  gameID={gameID} />
+            <div >
+              {/* Nappien sisältämä kontti terminaalin yläpuolella */}
+              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '10px' }}>
+                <button onClick={() => handleButtonClick('play')}>Pelaa</button>
+                <button onClick={() => handleButtonClick('chat')}>Chat</button>
+                <button onClick={() => handleButtonClick('clear')}>Tyhjennä</button>
+                <button onClick={() => handleButtonClick('reset')}>Reset</button>
+                <button onClick={() => exitTerminal()}>Exit</button>
+              </div>
+
+              {/* Terminaalikontti */}
+
+              {isTerminalVisible && <ChatTerminal username={username} sendMessage={sendMessage} action={action} viesti={viesti} />}
+              {isGameVisible && <GameCanvas pelitila={pelitila} />}
             </div>
           </div>
         )}

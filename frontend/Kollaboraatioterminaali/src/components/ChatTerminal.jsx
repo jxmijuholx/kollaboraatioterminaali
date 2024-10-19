@@ -2,10 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 
-const ChatTerminal = ({ ws, gameID, username, sendMessage, getMessage }) => {
+const ChatTerminal = ({ username, sendMessage, action, viesti }) => {
   const terminalRef = useRef(null);
   const term = useRef(null);
   const inputBuffer = useRef('');
+
+
 
   useEffect(() => {
     if (!term.current && terminalRef.current) {
@@ -18,7 +20,7 @@ const ChatTerminal = ({ ws, gameID, username, sendMessage, getMessage }) => {
       });
 
       term.current.open(terminalRef.current);
-      term.current.writeln('Welcome to the chat terminal!');
+      term.current.writeln('Welcome to the chat kollaboratioterminal, try chatting!');
       term.current.prompt = () => {
         const promptColor = '\x1b[34m';
         const promptText = `${promptColor}${username}:\x1b[0m $ `;
@@ -33,7 +35,8 @@ const ChatTerminal = ({ ws, gameID, username, sendMessage, getMessage }) => {
           const message = inputBuffer.current.trim();
           if (message) {
             sendMessage(message); // Lähetä viesti App.jsx:ään
-            term.current.writeln(`\r\n${username}: ${message}`); // Näytä viesti terminaalissa
+            // term.current.writeln(`\r\n${username}: ${message}`); // Näytä viesti terminaalissa
+            // console.log("Viesti lähetyksestä")
             inputBuffer.current = ''; // Tyhjennä bufferi
           }
           term.current.write('\r\n');
@@ -50,19 +53,53 @@ const ChatTerminal = ({ ws, gameID, username, sendMessage, getMessage }) => {
         }
       });
     }
-  }, [ws, gameID, username, sendMessage]);
+  }, [sendMessage]);
 
-  // Näytetään vastaanotetut viestit terminaalissa
   useEffect(() => {
-    const messages = getMessage(); // Hae viestit App.jsx:stä
-    if (term.current && messages.length > 0) {
-      messages.forEach((message) => {
-        term.current.writeln(`\r\n${message.from}: ${message.content}`);
-      });
+    const storedClientId = localStorage.getItem('clientId'); // Haetaan clientID localStoragesta
+  
+    if (viesti && viesti.from && viesti.content) {
+      console.log(viesti);
+  
+      // Tarkistetaan, että viesti ei ole tullut itseltä
+      if (viesti.from !== storedClientId) {
+        // Näytetään viestin lähettäjä ja viestin sisältö vain vastaanottajalle
+        term.current.write(`\r\n${viesti.from}: ${viesti.content}\r\n`);
+        
+        // Näytetään uusi prompt
+        term.current.prompt(); 
+      }
     }
-  }, [getMessage]); // Päivitä terminaali, kun uusia viestejä on saatu
+  }, [viesti]); // Päivitä terminaali, kun uusia viestejä on saatu
 
-  return <div ref={terminalRef} style={{ width: 'auto', height: 'auto' }}></div>;
+  
+
+  // Tarkkaile pääkomponentista tulevaa toimintoa ja reagoi sen mukaan
+  useEffect(() => {
+    if (action) {
+      switch (action) {
+        case 'play':
+          term.current.clear();
+          term.current.writeln('Playing game...');
+          break;
+        case 'chat':
+          term.current.reset();
+          term.current.writeln('Switched to chat mode...');
+          break;
+        case 'clear':
+          term.current.clear();
+          break;
+        case 'reset':
+          term.current.reset();
+          break;
+        default:
+          break;
+      }
+    }
+  }, [action]); // Tämä hook kutsutaan aina kun action muuttuu
+
+  return <div ref={terminalRef} style={{ flex: 1, border: '1px solid #ccc' }}></div>
+
 };
 
 export default ChatTerminal;
