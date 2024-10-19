@@ -14,11 +14,10 @@ const GameCanvas = ({ pelitila }) => {
       position: clientData.position
     };
   });
-  let pelaaja1 = 0;
-  let pelaaja2 = 0;
 
-   pelaaja1 = positions[0]["position"];
-   pelaaja2 = positions[1]["position"];
+  const currentClientId = localStorage.getItem('clientId');
+  const pelaaja1 = positions.find(p => p.clientID === localStorage.getItem('clientId')) || { position: 0 };
+  const pelaaja2 = positions.find(p => p.clientID !== localStorage.getItem('clientId')) || { position: 0 };
 
   const drawPaddles = (ctx, leftPaddleY, rightPaddleY) => {
     // Tyhjennetään canvas
@@ -38,15 +37,29 @@ const GameCanvas = ({ pelitila }) => {
     const ctx = canvas.getContext('2d');
 
     // Muunnetaan position-arvot canvasin koordinaateiksi
-    const leftPaddleY = (canvasHeight / 2) + pelaaja1 * (canvasHeight / 2 - paddleHeight / 2);
-    const rightPaddleY = (canvasHeight / 2) + pelaaja2 * (canvasHeight / 2 - paddleHeight / 2);
+    const leftPaddleY = Math.max(
+      0,
+      Math.min(
+        (canvasHeight / 2) - (pelaaja1.position * (canvasHeight / 20)) - (paddleHeight / 2),
+        canvasHeight - paddleHeight
+      )
+    );
+
+    const rightPaddleY = Math.max(
+      0,
+      Math.min(
+        (canvasHeight / 2) - (pelaaja2.position * (canvasHeight / 20)) - (paddleHeight / 2),
+        canvasHeight - paddleHeight
+      )
+    );
+
 
     // Piirretään päivitetyt mailat
     drawPaddles(ctx, leftPaddleY, rightPaddleY);
-  }, [pelaaja1, pelaaja2]); // Päivitetään aina kun pelaaja1 tai pelaaja2 muuttuu
+  }, [pelaaja1, pelaaja2, pelitila]); // Päivitetään aina kun pelaaja1 tai pelaaja2 muuttuu
 
   return (
-    <canvas ref={canvasRef} width={600} height={400} style={{ border: '1px solid black' }}></canvas>
+    <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} style={{ border: '1px solid white', backgroundColor: 'black' }}></canvas>
   );
 };
 

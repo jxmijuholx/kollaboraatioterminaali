@@ -317,8 +317,8 @@ function App() {
         {isLobbyVisible && (
           <div>
             <div className='movementButtons'>
-              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
-              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
+              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
+              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
             </div>
             <div >
               {/* Nappien sisältämä kontti terminaalin yläpuolella */}
