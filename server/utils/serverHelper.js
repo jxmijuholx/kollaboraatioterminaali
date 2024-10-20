@@ -6,26 +6,26 @@ const games = new Map();
 function createGame(result, connection) {
     try {
         const clientID = result.clientID;
+        const username = result.username;
         const gameID = uuidv4();
 
         const game = {
             id: gameID,
-            clients: [],
+            clients: [{ clientID, username }],
             state: {},
             messageHistory: []
         };
 
         games.set(gameID, game);
-
-        clients.set(clientID, { connection });
+        clients.set(clientID, { connection, username });
 
         const payload = {
             action: "create",
-            game: game
+            game
         };
 
         connection.send(JSON.stringify(payload));
-        console.log(`Game created with ID: ${gameID}`);
+        console.log(`Game created with ID: ${gameID} by user: ${username}`);
     } catch (error) {
         console.error('Error creating game:', error.message);
         connection.send(JSON.stringify({
@@ -38,31 +38,21 @@ function createGame(result, connection) {
 function joinGame(result, connection) {
     try {
         const clientID = result.clientID;
+        const username = result.username;
         const gameID = result.gameID;
 
-        // Check if the game exists
         const game = games.get(gameID);
-        if (!game) {
-            throw new Error("Game not found");
-        }
+        if (!game) throw new Error("Game not found");
+        if (game.clients.length >= 2) throw new Error("Game is full");
 
-        // Check if the game is full
-        if (game.clients.length >= 2) {
-            throw new Error("Game is full");
-        }
-
-        // Assign paddle to the client
         const paddle = game.clients.length === 0 ? "Left" : "Right";
-        game.clients.push({
-            clientID: clientID,
-            paddle: paddle
-        });
+        game.clients.push({ clientID, paddle, username });
 
-        clients.set(clientID, { connection });
+        clients.set(clientID, { connection, username });
 
         const payload = {
             action: "join",
-            game: game
+            game
         };
 
         game.clients.forEach(c => {
@@ -72,11 +62,9 @@ function joinGame(result, connection) {
             }
         });
 
-        if (game.clients.length === 2) {
-            updateGameState();
-        }
+        if (game.clients.length === 2) updateGameState();
 
-        console.log(`Client ${clientID} joined game ${gameID}`);
+        console.log(`Client ${clientID} (${username}) joined game ${gameID}`);
     } catch (error) {
         console.error('Error joining game:', error.message);
         connection.send(JSON.stringify({
@@ -90,14 +78,10 @@ function playGame(result) {
     try {
         const { gameID, paddleID, side } = result;
 
-        if (!gameID || !paddleID || !side) {
-            throw new Error("Missing game ID, paddle ID, or side");
-        }
+        if (!gameID || !paddleID || !side) throw new Error("Missing game ID, paddle ID, or side");
 
         const game = games.get(gameID);
-        if (!game) {
-            throw new Error("Game not found");
-        }
+        if (!game) throw new Error("Game not found");
 
         game.state[paddleID] = side;
 
@@ -138,19 +122,13 @@ function handleMessages(result) {
     try {
         const { gameID, clientID, action, content, username } = result;
 
-        if (!gameID || !clientID) {
-            throw new Error("Missing game ID or client ID.");
-        }
+        if (!gameID || !clientID) throw new Error("Missing game ID or client ID.");
 
         const game = games.get(gameID);
-        if (!game) {
-            throw new Error("Game not found");
-        }
+        if (!game) throw new Error("Game not found");
 
         if (action === 'sendmessage') {
-            if (!content) {
-                throw new Error("Message content is missing");
-            }
+            if (!content) throw new Error("Message content is missing");
 
             const message = {
                 action: 'message',
@@ -169,7 +147,6 @@ function handleMessages(result) {
             });
 
             console.log(`Message sent: ${content}`);
-
         } else if (action === "getmessages") {
             const messageHistory = game.messageHistory || [];
             const payload = {
@@ -190,14 +167,10 @@ function movePaddle(result) {
     try {
         const { gameID, clientID, direction } = result;
 
-        if (!gameID || !clientID) {
-            throw new Error("Missing game ID or client ID");
-        }
+        if (!gameID || !clientID) throw new Error("Missing game ID or client ID");
 
         const game = games.get(gameID);
-        if (!game) {
-            throw new Error("Game not found");
-        }
+        if (!game) throw new Error("Game not found");
 
         // mailojen lokaatio alussa
         game.state[clientID] = game.state[clientID] || { position: 0 };
@@ -228,7 +201,6 @@ function movePaddle(result) {
                 clientConnection.send(JSON.stringify(payload));
             }
         });
-
     } catch (error) {
         console.error('Error moving paddle:', error.message);
         throw new Error("Error moving paddle");
@@ -236,4 +208,25 @@ function movePaddle(result) {
 }
 
 
-module.exports = { createGame, joinGame, playGame, handleMessages, movePaddle, clients, games };
+function cleanupEmptyGames(clientID) {
+    games.forEach((game, gameID) => {
+        game.clients = game.clients.filter(c => c.clientID !== clientID);
+        if (game.clients.length === 0) {
+            console.log(`Removing empty game: ${gameID}`);
+            games.delete(gameID);
+        }
+    });
+    clients.delete(clientID);
+}
+
+module.exports = {
+    createGame,
+    joinGame,
+    playGame,
+    handleMessages,
+    movePaddle,
+    updateGameState,
+    cleanupEmptyGames,
+    clients,
+    games
+};

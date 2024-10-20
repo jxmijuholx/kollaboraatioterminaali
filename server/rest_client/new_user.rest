@@ -1,0 +1,17 @@
+### Register a new user
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+    "username": "jamipelaa",
+    "password": "6969"
+}
+
+### Login with the newly registered user
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+    "username": "jamipelaa",
+    "password": "6969"
+}
