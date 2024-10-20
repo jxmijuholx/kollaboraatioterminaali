@@ -172,13 +172,14 @@ function movePaddle(result) {
         const game = games.get(gameID);
         if (!game) throw new Error("Game not found");
 
+        // mailojen lokaatio alussa
         game.state[clientID] = game.state[clientID] || { position: 0 };
 
+        // päivitetään sijainti
         if (direction === 'up') {
-            game.state[clientID].position -= 1;
+            game.state[clientID].position = Math.max(game.state[clientID].position - 1, -8); // cap at -8
         } else if (direction === 'down') {
-            game.state[clientID].position += 1;
-        } else {
+            game.state[clientID].position = Math.min(game.state[clientID].position + 1, 8); // cap at 8
             throw new Error("Unknown direction");
         }
 
@@ -193,6 +194,7 @@ function movePaddle(result) {
             }
         };
 
+        // Notify all clients of the updated game state
         game.clients.forEach(c => {
             const clientConnection = clients.get(c.clientID).connection;
             if (clientConnection && clientConnection.connected) {
@@ -204,6 +206,7 @@ function movePaddle(result) {
         throw new Error("Error moving paddle");
     }
 }
+
 
 function cleanupEmptyGames(clientID) {
     games.forEach((game, gameID) => {
