@@ -35,7 +35,11 @@ function Login({ open, closeLogin, handleLogin, openRegister }) {
 
     return (
         <>
-            <Dialog open={open} onClose={handleClose} style={{ color: "inherit" }}>
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                style={{ color: "inherit" }}
+            >
                 <DialogTitle>Login to collaboration terminal</DialogTitle>
                 <DialogContent>
                     <form onSubmit={handleSubmit}>
@@ -58,10 +62,29 @@ function Login({ open, closeLogin, handleLogin, openRegister }) {
                         />
                         {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
                         <DialogActions>
-                            <Button variant="contained" color="error" onClick={handleClose}>Cancel</Button>
-                            <Button variant="contained" color="success" type="submit">Login <LoginIcon /></Button>
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={handleClose}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                type="submit"
+                            >
+                                Login
+                                <LoginIcon />
+                            </Button>
                             <Typography>Don't have an account yet? Create one now!</Typography>
-                            <Button variant="contained" color="secondary" onClick={openRegister}>Create account</Button>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                onClick={openRegister}
+                            >
+                                Create account
+                            </Button>
                         </DialogActions>
                     </form>
                 </DialogContent>

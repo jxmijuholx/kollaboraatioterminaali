@@ -73,8 +73,21 @@ function Register({ open, handleRegister, closeRegister }) {
                         />
                         {error && <div style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
                         <DialogActions>
-                            <Button variant="contained" color="error" onClick={handleClose}>Cancel</Button>
-                            <Button variant="contained" color="success" type="submit" onClick={handleSubmit}>Create account </Button>
+                            <Button
+                                variant="contained"
+                                color="error"
+                                onClick={handleClose}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="success"
+                                type="submit"
+                                onClick={handleSubmit}
+                            >
+                                Create account
+                            </Button>
                         </DialogActions>
                     </form>
                 </DialogContent>
