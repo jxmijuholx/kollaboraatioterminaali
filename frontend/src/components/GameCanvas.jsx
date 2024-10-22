@@ -59,7 +59,13 @@ const GameCanvas = ({ pelitila }) => {
   }, [pelaaja1, pelaaja2, pelitila]); // Päivitetään aina kun pelaaja1 tai pelaaja2 muuttuu
 
   return (
-    <canvas ref={canvasRef} width={canvasWidth} height={canvasHeight} style={{ border: '1px solid white', backgroundColor: 'black' }}></canvas>
+    <canvas
+      ref={canvasRef}
+      width={canvasWidth}
+      height={canvasHeight}
+      style={{ border: '1px solid white', backgroundColor: 'black' }}
+    >
+    </canvas>
   );
 };
 

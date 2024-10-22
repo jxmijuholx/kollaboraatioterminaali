@@ -57,22 +57,22 @@ const ChatTerminal = ({ username, sendMessage, action, viesti }) => {
 
   useEffect(() => {
     const storedClientId = localStorage.getItem('clientId'); // Haetaan clientID localStoragesta
-  
+
     if (viesti && viesti.from && viesti.content) {
       console.log(viesti);
-  
+
       // Tarkistetaan, että viesti ei ole tullut itseltä
       if (viesti.from !== storedClientId) {
         // Näytetään viestin lähettäjä ja viestin sisältö vain vastaanottajalle
         term.current.write(`\r\n${viesti.from}: ${viesti.content}\r\n`);
-        
+
         // Näytetään uusi prompt
-        term.current.prompt(); 
+        term.current.prompt();
       }
     }
   }, [viesti]); // Päivitä terminaali, kun uusia viestejä on saatu
 
-  
+
 
   // Tarkkaile pääkomponentista tulevaa toimintoa ja reagoi sen mukaan
   useEffect(() => {
@@ -98,8 +98,15 @@ const ChatTerminal = ({ username, sendMessage, action, viesti }) => {
     }
   }, [action]); // Tämä hook kutsutaan aina kun action muuttuu
 
-  return <div ref={terminalRef} style={{ flex: 1, border: '1px solid #ccc' }}></div>
-
+  return (
+    <div
+      ref={terminalRef}
+      style={{
+        flex: 1,
+        border: '1px solid #ccc'
+      }}>
+    </div>
+  )
 };
 
 export default ChatTerminal;
