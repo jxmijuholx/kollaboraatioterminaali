@@ -1,3 +1,4 @@
+
 const { v4: uuidv4 } = require('uuid');
 
 const clients = new Map();
@@ -11,7 +12,7 @@ function createGame(result, connection) {
 
         const game = {
             id: gameID,
-            clients: [{ clientID, username }],
+            clients: [],
             state: {},
             messageHistory: []
         };
@@ -21,7 +22,10 @@ function createGame(result, connection) {
 
         const payload = {
             action: "create",
-            game
+            game: {
+                id: gameID,
+                state: game.state
+            }
         };
 
         connection.send(JSON.stringify(payload));
@@ -43,6 +47,9 @@ function joinGame(result, connection) {
 
         const game = games.get(gameID);
         if (!game) throw new Error("Game not found");
+
+        const existingClient = game.clients.find(c => c.clientID === clientID);
+        if (existingClient) throw new Error("Client is already in the game");
         if (game.clients.length >= 2) throw new Error("Game is full");
 
         const paddle = game.clients.length === 0 ? "Left" : "Right";
@@ -52,7 +59,11 @@ function joinGame(result, connection) {
 
         const payload = {
             action: "join",
-            game
+            game: {
+                id: gameID,
+                clients: game.clients,
+                state: game.state
+            }
         };
 
         game.clients.forEach(c => {
@@ -172,14 +183,13 @@ function movePaddle(result) {
         const game = games.get(gameID);
         if (!game) throw new Error("Game not found");
 
-        // mailojen lokaatio alussa
         game.state[clientID] = game.state[clientID] || { position: 0 };
 
-        // päivitetään sijainti
         if (direction === 'up') {
-            game.state[clientID].position = Math.max(game.state[clientID].position - 1, -8); // cap at -8
+            game.state[clientID].position = Math.max(game.state[clientID].position - 1, -8);
         } else if (direction === 'down') {
-            game.state[clientID].position = Math.min(game.state[clientID].position + 1, 8); // cap at 8
+            game.state[clientID].position = Math.min(game.state[clientID].position + 1, 8);
+        } else {
             throw new Error("Unknown direction");
         }
 
@@ -194,7 +204,6 @@ function movePaddle(result) {
             }
         };
 
-        // Notify all clients of the updated game state
         game.clients.forEach(c => {
             const clientConnection = clients.get(c.clientID).connection;
             if (clientConnection && clientConnection.connected) {
@@ -203,10 +212,8 @@ function movePaddle(result) {
         });
     } catch (error) {
         console.error('Error moving paddle:', error.message);
-        throw new Error("Error moving paddle");
     }
 }
-
 
 function cleanupEmptyGames(clientID) {
     games.forEach((game, gameID) => {
