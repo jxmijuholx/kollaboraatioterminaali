@@ -1,11 +1,10 @@
 import '../App.css';
-import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AddIcon from "@mui/icons-material/Add";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import LinkIcon from "@mui/icons-material/Link";
-
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
 import 'xterm/css/xterm.css';
@@ -37,7 +36,11 @@ function App() {
 
   // Connect to websocket when opening page
   useEffect(() => {
-    const newWs = new WebSocket("ws://localhost:8080");
+    const storedToken = localStorage.getItem('jwt-token')
+    const parsed = JSON.parse(storedToken);
+    const token = parsed.token
+
+    const newWs = new WebSocket(`ws://localhost:8080/?token=${token}`);
 
     // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
@@ -51,14 +54,13 @@ function App() {
           setClientId(response.clientID);
           console.log("connected to: ", response.clientID);
           localStorage.setItem("clientId", response.clientID);
-          console.log(localStorage.getItem("username"))
           break;
 
         // Create new game and set game Id to state variable, store game Id to localstorage
         case "create":
           setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
-          localStorage.setItem("game id", response.game.id)
+          localStorage.setItem("gameId", response.game.id)
           break;
 
         //Join game and set clients to players array
@@ -142,7 +144,7 @@ function App() {
     }
   };
 
- 
+
 
   const exitTerminal = () => {
     setIsTerminalVisible(false);
@@ -278,7 +280,7 @@ function App() {
               />
               <Button onClick={() => {
                 joinGame(),
-                  handleLobbyOpen()
+                  handleLobbyOpen
               }}
                 color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
             </CardContent>
