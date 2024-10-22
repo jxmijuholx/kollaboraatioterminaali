@@ -106,7 +106,7 @@ function Home() {
         }
     };
 
-    const handleRegister = async (password, username) => {
+    const handleRegister = async (username, password) => {
         const registerData = {
             username,
             password
