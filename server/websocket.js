@@ -5,8 +5,15 @@ const User = require('./models/user');
 
 function setupWebSocketServer(pongWS) {
     pongWS.on('request', async request => {
+        // try {
+        //     const token = request.httpRequest.headers['authorization']?.split(' ')[1];
+        //     if (!token) {
+        //         throw new Error('No token provided');
+        //     }
+
         try {
-            const token = request.httpRequest.headers['authorization']?.split(' ')[1];
+            const url = new URL(request.httpRequest.url, `http://${request.httpRequest.headers.host}`);
+            const token = url.searchParams.get('token');
             if (!token) {
                 throw new Error('No token provided');
             }

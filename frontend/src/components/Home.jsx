@@ -1,10 +1,20 @@
 import '../App.css';
 import { AppBar, Typography, Button, TextField, Box } from '@mui/material';
 import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { json, Link, Outlet, useLocation } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
+
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
 
 function Home() {
+
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [loginOpen, setLoginOpen] = useState(false);
+    const [registerOpen, setRegisterOpen] = useState(false);
+    const [username, setUsername] = useState("");
 
     const words = [
         "ocean",
@@ -59,7 +69,80 @@ function Home() {
 
     const location = useLocation();
 
-    const [username, setUsername] = useState("");
+    const loginLink = 'http://localhost:8080/auth/login'
+    const registerLink = 'http://localhost:8080/auth/register'
+
+    const handleOpenRegister = () => {
+        setLoginOpen(false);
+        setRegisterOpen(true);
+    };
+
+    const handleLogin = async (username, password) => {
+        const loginData = {
+            username,
+            password
+        };
+        try {
+            const res = await fetch(loginLink, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData)
+            });
+
+            if (res.ok) {
+                const token = await res.json();
+                localStorage.setItem('jwt-token', JSON.stringify(token));
+                setUsername(username);
+                setLoggedIn(true);
+                return true;
+            } else {
+                console.log("User credentials not found, register or check for spelling errors");
+                return false;
+            }
+        } catch (error) {
+            console.error("Login request failed:", error);
+        }
+    };
+
+    const handleRegister = async (username, password) => {
+        const registerData = {
+            username,
+            password
+        };
+
+        try {
+            const res = await fetch(registerLink, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registerData)
+            });
+
+            if (res.ok) {
+                console.log("User created!");
+                alert("Account created!");
+                setLoginOpen(true);
+                return true;
+            } else {
+                console.log("Error: Couldn't register user");
+                return false;
+            }
+        } catch (error) {
+            console.error("Registration request failed:", error);
+        }
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('jwt-token');
+        localStorage.removeItem('username')
+        localStorage.removeItem('gameId')
+        localStorage.removeItem('clientId')
+        setLoggedIn(false);
+        setUsername("");
+    };
 
     const generateName = () => {
         const random = adjectives[Math.floor(Math.random() * adjectives.length)] + "-" + words[Math.floor(Math.random() * words.length)]
@@ -89,6 +172,20 @@ function Home() {
                 <Typography variant='h4' >
                     Collaboration terminal (Change name?)
                 </Typography>
+                {loggedIn ?
+                    <Button onClick={handleLogout}>
+                        Log out
+                        <LogoutIcon />
+                    </Button>
+                    :
+                    <Button variant='contained' onClick={() => setLoginOpen(true)}>
+                        Log in
+                        <LoginIcon style={{ marginLeft: 2 }} />
+                    </Button>
+                }
+                <Login open={loginOpen} handleLogin={handleLogin} closeLogin={() => setLoginOpen(false)} openRegister={handleOpenRegister} />
+                <Register open={registerOpen} handleRegister={handleRegister} closeRegister={() => setRegisterOpen(false)} />
+                <Register />
             </AppBar>
 
             {/* Only display this if we are on the home page */}
