@@ -1,15 +1,15 @@
-import '../App.css';
-import { Card, CardContent, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import AddIcon from "@mui/icons-material/Add";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
 import LinkIcon from "@mui/icons-material/Link";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import { Button, Card, CardContent, FormControl, Grid2, InputLabel, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../App.css';
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
 import 'xterm/css/xterm.css';
-import GameCanvas from './GameCanvas';
 import ChatTerminal from './ChatTerminal';
+import GameCanvas from './GameCanvas';
 
 function App() {
 
