@@ -1,4 +1,4 @@
-require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const { connectDB } = require('./db');
 const authRoutes = require('./routes/authRoute');
@@ -8,24 +8,24 @@ const { setupWebSocketServer } = require('./websocket');
 const cors = require('cors');
 
 const app = express();
-app.use(express.static('dist'))
+
+app.use(express.static(path.resolve(__dirname, 'dist')));
+
 connectDB();
 
-app.use(cors({
-    origin: 'http://localhost:5173'
-}));
-
+app.use(cors());
 app.use(express.json());
 app.use('/auth', authRoutes);
 
-app.get('/', (req, res) => {
-    res.send('Tervetuloa pong game API:in!');
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
 });
 
 const httpServer = http.createServer(app);
 
-httpServer.listen(8080, () => {
-    console.log('Server listening on port 8080');
+const PORT = process.env.PORT || 8080;
+httpServer.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
 });
 
 const pongWS = new WebSocketServer({

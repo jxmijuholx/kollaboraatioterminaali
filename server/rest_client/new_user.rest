@@ -1,17 +1,17 @@
 ### Register a new user
-POST http://localhost:8080/auth/register
+POST https://kollaboraatioterminaali.fly.dev/auth/register
 Content-Type: application/json
 
 {
-    "username": "LOL",
+    "username": "hihii",
     "password": ":3"
 }
 
 ### Login with the newly registered user
-POST http://localhost:8080/auth/login
+POST https://kollaboraatioterminaali.fly.dev/auth/login
 Content-Type: application/json
 
 {
-    "username": "LOL",
+    "username": "hihii",
     "password": ":3"
 }
