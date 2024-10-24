@@ -1,17 +1,17 @@
 ### Register a new user
-POST https://kollaboraatioterminaali.fly.dev/auth/register
+POST https://kollabterm.fly.dev/auth/register
 Content-Type: application/json
 
 {
-    "username": "hihii",
-    "password": ":3"
+    "username": "LOL1",
+    "password": "LOL"
 }
 
 ### Login with the newly registered user
-POST https://kollaboraatioterminaali.fly.dev/auth/login
+POST https://kollabterm.fly.dev/auth/login
 Content-Type: application/json
 
 {
-    "username": "hihii",
-    "password": ":3"
+    "username": "LOL1",
+    "password": "LOL"
 }

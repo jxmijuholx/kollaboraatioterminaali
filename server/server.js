@@ -9,7 +9,7 @@ const cors = require('cors');
 
 const app = express();
 
-app.use(express.static(path.resolve(__dirname, 'dist')));
+app.use(express.static('dist'))
 
 connectDB();
 
@@ -18,7 +18,7 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 
 app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+    res.sendFile(path.join(__dirname, '/dist/index.html'));
 });
 
 const httpServer = http.createServer(app);
@@ -33,3 +33,4 @@ const pongWS = new WebSocketServer({
 });
 
 setupWebSocketServer(pongWS);
+

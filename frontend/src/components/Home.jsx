@@ -1,13 +1,13 @@
-import '../App.css';
-import { AppBar, Typography, Button, TextField, Box } from '@mui/material';
+import { AppBar, Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
+import '../App.css';
 import Login from './Login';
 import Register from './Register';
 
 import AutorenewIcon from '@mui/icons-material/Autorenew';
-import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 function Home() {
 
@@ -71,8 +71,8 @@ function Home() {
 
     const location = useLocation();
 
-    const loginLink = 'http://localhost:8080/auth/login'
-    const registerLink = 'http://localhost:8080/auth/register'
+    const loginLink = 'https://kollabterm.fly.dev/auth/login'
+    const registerLink = 'https://kollabterm.fly.dev/auth/register'
 
     // Dialog handler
     const handleOpenRegister = () => {
