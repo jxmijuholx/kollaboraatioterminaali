@@ -104,7 +104,7 @@ function App() {
 
         // Print error into console if an error happens
         case "error":
-          console.log("paska ei toimi error: ", response.message)
+          console.log("ei toimi, error: ", response.message)
           break;
       }
     };
