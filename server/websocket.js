@@ -68,6 +68,9 @@ function handleMessage(message, connection, clientID, username) {
             case 'sendmessage':
                 serverHelper.handleMessages(result);
                 break;
+            case 'handleBalls':
+                serverHelper.updateBallPosition(result);
+                break;
             default:
                 throw new Error("Unknown action: " + result.action);
         }
