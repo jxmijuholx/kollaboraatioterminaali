@@ -1,4 +1,3 @@
-
 const { v4: uuidv4 } = require('uuid');
 
 const clients = new Map();
@@ -17,9 +16,10 @@ function createGame(result, connection) {
             messageHistory: []
         };
 
+        console.log(games)
         games.set(gameID, game);
         clients.set(clientID, { connection, username });
-
+        console.log(games)
         const payload = {
             action: "create",
             game: {
@@ -30,8 +30,10 @@ function createGame(result, connection) {
 
         connection.send(JSON.stringify(payload));
         console.log(`Game created with ID: ${gameID} by user: ${username}`);
+
     } catch (error) {
         console.error('Error creating game:', error.message);
+
         connection.send(JSON.stringify({
             action: "error",
             message: "Failed to create the game"
@@ -56,7 +58,7 @@ function joinGame(result, connection) {
         game.clients.push({ clientID, paddle, username });
 
         clients.set(clientID, { connection, username });
-
+        console.log(clients)
         const payload = {
             action: "join",
             game: {
@@ -76,6 +78,7 @@ function joinGame(result, connection) {
         if (game.clients.length === 2) updateGameState();
 
         console.log(`Client ${clientID} (${username}) joined game ${gameID}`);
+
     } catch (error) {
         console.error('Error joining game:', error.message);
         connection.send(JSON.stringify({
@@ -108,7 +111,7 @@ function updateGameState() {
             const gameState = {
                 id: game.id,
                 clients: game.clients,
-                state: game.state
+                state: game.state,
             };
 
             const payload = {
@@ -149,6 +152,8 @@ function handleMessages(result) {
             };
 
             game.messageHistory.push(message);
+
+            console.log(`Message received from player ${clientID} for game ${gameID}: ${content}`);
 
             game.clients.forEach(c => {
                 const clientConnection = clients.get(c.clientID).connection;

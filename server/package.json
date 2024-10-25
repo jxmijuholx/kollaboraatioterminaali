@@ -6,7 +6,11 @@
   "scripts": {
     "test": "vitest",
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build:ui": "rm -rf dist && cd ../frontend && npm install && npm run build && cp -r dist ../server",
+    "deploy": "fly deploy",
+    "deploy:full": "npm run build:ui && npm run deploy",
+    "logs:prod": "fly logs"
   },
   "author": "",
   "license": "MIT",
@@ -24,6 +28,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.9",
     "nodemon": "^3.1.4"
   }
 }

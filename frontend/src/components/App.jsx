@@ -40,7 +40,8 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-    const newWs = new WebSocket(`ws://localhost:8080/?token=${token}`);
+    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+
 
     // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
@@ -104,7 +105,7 @@ function App() {
 
         // Print error into console if an error happens
         case "error":
-          console.log("paska ei toimi error: ", response.message)
+          console.log("ei toimi, error: ", response.message)
           break;
       }
     };
