@@ -40,7 +40,8 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-    const newWs = new WebSocket(`ws://localhost:8080/?token=${token}`);
+    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+
 
     // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
@@ -104,7 +105,7 @@ function App() {
 
         // Print error into console if an error happens
         case "error":
-          console.log("paska ei toimi error: ", response.message)
+          console.log("ei toimi, error: ", response.message)
           break;
       }
     };
@@ -257,12 +258,36 @@ function App() {
           <Link to={'/'}>Back to home</Link>
         </Grid2>
         <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
+          <Card style={{
+            height: 300,
+            width: 250,
+            background: "gray"
+          }}
+          >
             <CardContent>
               <Typography variant='h5'>Create game</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Create a new game and give the generated game ID to a player to let them join.</Typography>
-              {newGameId ? <Typography>Created game with ID: {newGameId}</Typography> : <Typography style={{ marginTop: 71 }}></Typography>}
-              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 15 }}>New game <AddIcon /> </Button>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Create a new game and give the generated game ID to a player to let them join.
+              </Typography>
+              {newGameId ?
+                <Typography>
+                  Created game with ID: {newGameId}
+                </Typography>
+                :
+                <Typography style={{ marginTop: 71 }}>
+                </Typography>}
+              <Button
+                onClick={createGame}
+                color='success'
+                variant='contained'
+                style={{ marginTop: 15 }}
+              >
+                New game
+                <AddIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
@@ -271,7 +296,12 @@ function App() {
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
               <Typography variant='h5'>Join game</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Join an already existing game by entering the game ID below.</Typography>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Join an already existing game by entering the game ID below.
+              </Typography>
               <TextField
                 label="Game ID"
                 style={{ marginTop: 15 }}
@@ -291,7 +321,12 @@ function App() {
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
               <Typography variant='h5'>Play local</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Create a local game to play single player against a bot. Choose bot difficulty below.</Typography>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Create a local game to play single player against a bot. Choose bot difficulty below.
+              </Typography>
               <FormControl fullWidth style={{ marginTop: 15 }}>
                 <InputLabel id="difficulty-input-label">Choose difficulty</InputLabel>
                 <Select
@@ -307,20 +342,43 @@ function App() {
                   <MenuItem value={40}>Impossible, Good Luck!</MenuItem>
                 </Select>
               </FormControl>
-              <Button onClick={handleOpen} color='success' variant='contained' style={{ marginTop: 15 }}>Play locally <SmartToyIcon /> </Button>
+              <Button
+                onClick={handleOpen}
+                color='success'
+                variant='contained'
+                style={{ marginTop: 15 }}>
+                Play locally
+                <SmartToyIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
       </Grid2>
       <div className='lobbyparagraph'>
         <p>Lobby:</p>
-        <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
-          : "No players in lobby yet"}</p>
+        <p>
+          {players && players.length > 1 ?
+            "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
+            :
+            "No players in lobby yet"}
+        </p>
         {isLobbyVisible && (
           <div>
             <div className='movementButtons'>
-              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
-              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
+              <Button
+                onClick={moveUp}
+                color='primary'
+                variant='contained'
+                style={{ marginBottom: 10 }}>
+                Down
+              </Button>
+              <Button
+                onClick={moveDown}
+                color='primary'
+                variant='contained'
+                style={{ marginBottom: 10 }}>
+                Up
+              </Button>
             </div>
             <div >
               {/* Nappien sisältämä kontti terminaalin yläpuolella */}
