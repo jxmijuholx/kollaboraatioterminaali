@@ -108,6 +108,9 @@ function playGame(result) {
 function updateGameState() {
     try {
         games.forEach((game, gameID) => {
+            updateBallPosition(gameID);
+
+
             const gameState = {
                 id: game.id,
                 clients: game.clients,
@@ -219,6 +222,74 @@ function movePaddle(result) {
         console.error('Error moving paddle:', error.message);
     }
 }
+
+function updateBallPosition(gameID) {
+    const game = games.get(gameID)
+    if (!game) return;
+
+// pallo pelin alussa
+
+if (!game.state.ball) {
+    game.state.ball = {
+        x: 300, 
+        y: 200, 
+        dx: 2, 
+        dy: 2   
+    };
+}
+    const ball = game.state.ball;
+
+    // päivitä pallo lokaatio
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    // kolliisio ylä ja alareunan kanssa
+
+    if (ball.y <= 0 || ball.y >= 400) {  
+        ball.dy = -ball.dy;  // pallo vaihtaa suuntaa osumasta
+    }
+
+    // maila lokaatiot 
+    const leftPaddle = game.state[game.clients[0].clientID].position;
+    const rightPaddle = game.state[game.clients[1].clientID].position;
+
+     // kolliisio vasemman mailaan kanssa
+     if (
+        ball.x <= 20 &&  
+        ball.y >= leftPaddle &&
+        ball.y <= leftPaddle + 100  // 100 maila korkeus
+    ) {
+        ball.dx = -ball.dx;  // vaihda pallon suunta
+    }
+
+    // kolliisio oikean mailan kanssa
+    if (
+        ball.x >= 580 &&  
+        ball.y >= rightPaddle &&
+        ball.y <= rightPaddle + 100 // mailan korkeus
+    ) {
+        ball.dx = -ball.dx; // pallon suunta
+    }
+
+    const payload = {
+        action: "update",
+        game: {
+            id: gameID,
+            clients: game.clients,
+            state: game.state
+        }
+    };
+    game.clients.forEach(c => {
+        const clientConnection = clients.get(c.clientID).connection;
+        if (clientConnection && clientConnection.connected) {
+            clientConnection.send(JSON.stringify(payload));
+        }
+    });
+
+}
+
+
 
 function cleanupEmptyGames(clientID) {
     games.forEach((game, gameID) => {
