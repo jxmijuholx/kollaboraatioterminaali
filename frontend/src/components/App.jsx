@@ -382,11 +382,33 @@ function App() {
             <div >
               {/* Nappien sisältämä kontti terminaalin yläpuolella */}
               <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '10px' }}>
-                <button onClick={() => handleButtonClick('play')}>Pelaa</button>
-                <button onClick={() => handleButtonClick('chat')}>Chat</button>
-                <button onClick={() => handleButtonClick('clear')}>Tyhjennä</button>
-                <button onClick={() => handleButtonClick('reset')}>Reset</button>
-                <button onClick={() => exitTerminal()}>Exit</button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('play')}
+                  disabled={players.length < 2}>
+                  Pelaa
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('chat')}>
+                  Chat
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('clear')}>
+                  Tyhjennä
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('reset')}
+                  disabled={players.length < 2}>
+                  Reset
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={(e) => exitTerminal()}>
+                  Exit
+                </Button>
               </div>
 
               {/* Terminaalikontti */}

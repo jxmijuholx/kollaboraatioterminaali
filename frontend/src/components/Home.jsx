@@ -1,5 +1,5 @@
 import '../App.css';
-import { AppBar, Typography, Button, TextField, Box } from '@mui/material';
+import { AppBar, Typography, Button, TextField, Box, Toolbar } from '@mui/material';
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import Login from './Login';
@@ -176,23 +176,31 @@ function Home() {
                     color: "white",
                     marginBottom: 20
                 }}>
-                <Typography variant='h4' >
-                    Collaboration terminal (Change name?)
-                </Typography>
-                {loggedIn ?
-                    <Button onClick={handleLogout}>
-                        Log out
-                        <LogoutIcon />
-                    </Button>
-                    :
-                    <Button variant='contained' onClick={() => setLoginOpen(true)}>
-                        Log in
-                        <LoginIcon style={{ marginLeft: 2 }} />
-                    </Button>
-                }
-                <Login open={loginOpen} handleLogin={handleLogin} closeLogin={() => setLoginOpen(false)} openRegister={handleOpenRegister} />
-                <Register open={registerOpen} handleRegister={handleRegister} closeRegister={() => setRegisterOpen(false)} />
-                <Register />
+                <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Box style={{ flexGrow: 2 }}></Box>
+                    <Typography variant='h4' align='center'>
+                        Collaboration terminal (Change name?)
+                    </Typography>
+                    <Box style={{ flexGrow: 1 }} display="flex" justifyContent="flex-end" >
+                        {loggedIn ?
+                            <Link to={"/"}>
+                                <Button
+                                    variant='outlined'
+                                    onClick={handleLogout}>
+                                    Log out
+                                    <LogoutIcon />
+                                </Button>
+                            </Link>
+                            :
+                            <Button variant='contained' onClick={() => setLoginOpen(true)}>
+                                Log in
+                                <LoginIcon />
+                            </Button>
+                        }</Box>
+                    <Login open={loginOpen} handleLogin={handleLogin} closeLogin={() => setLoginOpen(false)} openRegister={handleOpenRegister} />
+                    <Register open={registerOpen} handleRegister={handleRegister} closeRegister={() => setRegisterOpen(false)} />
+                    <Register />
+                </Toolbar>
             </AppBar>
 
             {/* Only display this if we are on the home page */}
