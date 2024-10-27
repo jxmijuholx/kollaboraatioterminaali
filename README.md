@@ -35,7 +35,7 @@ This game is for gamers stuck in a queue with a friend! So whenever you queue up
 - **Node.js**: Ensure you have Node.js installed. [Download Node.js](https://nodejs.org/)
 
 ### How to play
-1. Open a tthe website
+1. Open the website
 2. Copy the command from our website to the mini-terminal on the website and run it
 3. Wait for your friend to connect to the server
 4. Start playing!
@@ -43,7 +43,7 @@ This game is for gamers stuck in a queue with a friend! So whenever you queue up
 ### For Developers <3
  ```
 1. 
-git pull https://github.com/jxmijuholx/kollaboraatioterminaali.git
+git clone https://github.com/jxmijuholx/kollaboraatioterminaali.git
 
 2. 
 cd kollaboraatioterminaali

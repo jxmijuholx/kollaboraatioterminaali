@@ -1,4 +1,3 @@
-
 const { v4: uuidv4 } = require('uuid');
 
 const clients = new Map();
@@ -17,9 +16,10 @@ function createGame(result, connection) {
             messageHistory: []
         };
 
+        console.log(games)
         games.set(gameID, game);
         clients.set(clientID, { connection, username });
-
+        console.log(games)
         const payload = {
             action: "create",
             game: {
@@ -30,8 +30,10 @@ function createGame(result, connection) {
 
         connection.send(JSON.stringify(payload));
         console.log(`Game created with ID: ${gameID} by user: ${username}`);
+
     } catch (error) {
         console.error('Error creating game:', error.message);
+
         connection.send(JSON.stringify({
             action: "error",
             message: "Failed to create the game"
@@ -56,7 +58,7 @@ function joinGame(result, connection) {
         game.clients.push({ clientID, paddle, username });
 
         clients.set(clientID, { connection, username });
-
+        console.log(clients)
         const payload = {
             action: "join",
             game: {
@@ -76,6 +78,7 @@ function joinGame(result, connection) {
         if (game.clients.length === 2) updateGameState();
 
         console.log(`Client ${clientID} (${username}) joined game ${gameID}`);
+
     } catch (error) {
         console.error('Error joining game:', error.message);
         connection.send(JSON.stringify({
@@ -105,10 +108,13 @@ function playGame(result) {
 function updateGameState() {
     try {
         games.forEach((game, gameID) => {
+            updateBallPosition(gameID);
+
+
             const gameState = {
                 id: game.id,
                 clients: game.clients,
-                state: game.state
+                state: game.state,
             };
 
             const payload = {
@@ -149,6 +155,8 @@ function handleMessages(result) {
             };
 
             game.messageHistory.push(message);
+
+            console.log(`Message received from player ${clientID} for game ${gameID}: ${content}`);
 
             game.clients.forEach(c => {
                 const clientConnection = clients.get(c.clientID).connection;
@@ -214,6 +222,74 @@ function movePaddle(result) {
         console.error('Error moving paddle:', error.message);
     }
 }
+
+function updateBallPosition(gameID) {
+    const game = games.get(gameID)
+    if (!game) return;
+
+// pallo pelin alussa
+
+if (!game.state.ball) {
+    game.state.ball = {
+        x: 300, 
+        y: 200, 
+        dx: 2, 
+        dy: 2   
+    };
+}
+    const ball = game.state.ball;
+
+    // päivitä pallo lokaatio
+
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+
+    // kolliisio ylä ja alareunan kanssa
+
+    if (ball.y <= 0 || ball.y >= 400) {  
+        ball.dy = -ball.dy;  // pallo vaihtaa suuntaa osumasta
+    }
+
+    // maila lokaatiot 
+    const leftPaddle = game.state[game.clients[0].clientID].position;
+    const rightPaddle = game.state[game.clients[1].clientID].position;
+
+     // kolliisio vasemman mailaan kanssa
+     if (
+        ball.x <= 20 &&  
+        ball.y >= leftPaddle &&
+        ball.y <= leftPaddle + 100  // 100 maila korkeus
+    ) {
+        ball.dx = -ball.dx;  // vaihda pallon suunta
+    }
+
+    // kolliisio oikean mailan kanssa
+    if (
+        ball.x >= 580 &&  
+        ball.y >= rightPaddle &&
+        ball.y <= rightPaddle + 100 // mailan korkeus
+    ) {
+        ball.dx = -ball.dx; // pallon suunta
+    }
+
+    const payload = {
+        action: "update",
+        game: {
+            id: gameID,
+            clients: game.clients,
+            state: game.state
+        }
+    };
+    game.clients.forEach(c => {
+        const clientConnection = clients.get(c.clientID).connection;
+        if (clientConnection && clientConnection.connected) {
+            clientConnection.send(JSON.stringify(payload));
+        }
+    });
+
+}
+
+
 
 function cleanupEmptyGames(clientID) {
     games.forEach((game, gameID) => {

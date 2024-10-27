@@ -6,6 +6,8 @@ const GameCanvas = ({ pelitila }) => {
   const paddleWidth = 10;
   const canvasWidth = 600;
   const canvasHeight = 400;
+  const ballRadius = 10;
+
 
   // Poimitaan pelaajien positiot pelitilasta
   const positions = Object.entries(pelitila.state).map(([clientID, clientData]) => {
@@ -14,6 +16,8 @@ const GameCanvas = ({ pelitila }) => {
       position: clientData.position
     };
   });
+
+  const ball = pelitila.state.ball || { x: canvasWidth / 2, y: canvasHeight / 2 }; // pallo lokaatio, jos palloa ei olemassa spawnaa pallon keskelle
 
   const currentClientId = localStorage.getItem('clientId');
   const pelaaja1 = positions.find(p => p.clientID === localStorage.getItem('clientId')) || { position: 0 };
@@ -30,6 +34,14 @@ const GameCanvas = ({ pelitila }) => {
     // Piirretään oikea maila pelaaja2:n sijainnin mukaan
     ctx.fillStyle = 'red';
     ctx.fillRect(canvasWidth - paddleWidth - 10, rightPaddleY, paddleWidth, paddleHeight);
+  };
+
+  const drawBall = (ctx) => {
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2); // pyöreä pallo
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.closePath();
   };
 
   useEffect(() => {
@@ -56,6 +68,7 @@ const GameCanvas = ({ pelitila }) => {
 
     // Piirretään päivitetyt mailat
     drawPaddles(ctx, leftPaddleY, rightPaddleY);
+    drawBall(ctx, ball.x, ball.y);
   }, [pelaaja1, pelaaja2, pelitila]); // Päivitetään aina kun pelaaja1 tai pelaaja2 muuttuu
 
   return (
