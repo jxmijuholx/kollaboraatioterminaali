@@ -1,6 +1,6 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, Typography } from "@mui/material";
-import { useState } from "react";
 import LoginIcon from '@mui/icons-material/Login';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
+import { useState } from "react";
 
 
 function Login({ open, closeLogin, handleLogin, openRegister }) {

@@ -34,5 +34,4 @@ describe('Kollaboraatioterminaali', () => {
         await expect(page.getByText('Welcome test!')).not.toBeVisible();
         expect (await page.locator('text=Log in').isVisible()).toBeTruthy();
     })
-
 })
