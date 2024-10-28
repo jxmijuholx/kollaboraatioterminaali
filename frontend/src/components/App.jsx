@@ -1,16 +1,15 @@
-import '../App.css';
-import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import AddIcon from "@mui/icons-material/Add";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
 import LinkIcon from "@mui/icons-material/Link";
-
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import { Button, Card, CardContent, FormControl, Grid2, InputLabel, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../App.css';
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
 import 'xterm/css/xterm.css';
-import GameCanvas from './GameCanvas';
 import ChatTerminal from './ChatTerminal';
+import GameCanvas from './GameCanvas';
 
 function App() {
 
@@ -37,7 +36,12 @@ function App() {
 
   // Connect to websocket when opening page
   useEffect(() => {
-    const newWs = new WebSocket("ws://localhost:8080");
+    const storedToken = localStorage.getItem('jwt-token')
+    const parsed = JSON.parse(storedToken);
+    const token = parsed.token
+
+    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+
 
     // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
@@ -51,14 +55,13 @@ function App() {
           setClientId(response.clientID);
           console.log("connected to: ", response.clientID);
           localStorage.setItem("clientId", response.clientID);
-          console.log(localStorage.getItem("username"))
           break;
 
         // Create new game and set game Id to state variable, store game Id to localstorage
         case "create":
           setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
-          localStorage.setItem("game id", response.game.id)
+          localStorage.setItem("gameId", response.game.id)
           break;
 
         //Join game and set clients to players array
@@ -102,7 +105,7 @@ function App() {
 
         // Print error into console if an error happens
         case "error":
-          console.log("paska ei toimi error: ", response.message)
+          console.log("ei toimi, error: ", response.message)
           break;
       }
     };
@@ -142,7 +145,7 @@ function App() {
     }
   };
 
- 
+
 
   const exitTerminal = () => {
     setIsTerminalVisible(false);
@@ -255,12 +258,36 @@ function App() {
           <Link to={'/'}>Back to home</Link>
         </Grid2>
         <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
+          <Card style={{
+            height: 300,
+            width: 250,
+            background: "gray"
+          }}
+          >
             <CardContent>
               <Typography variant='h5'>Create game</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Create a new game and give the generated game ID to a player to let them join.</Typography>
-              {newGameId ? <Typography>Created game with ID: {newGameId}</Typography> : <Typography style={{ marginTop: 71 }}></Typography>}
-              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 15 }}>New game <AddIcon /> </Button>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Create a new game and give the generated game ID to a player to let them join.
+              </Typography>
+              {newGameId ?
+                <Typography>
+                  Created game with ID: {newGameId}
+                </Typography>
+                :
+                <Typography style={{ marginTop: 71 }}>
+                </Typography>}
+              <Button
+                onClick={createGame}
+                color='success'
+                variant='contained'
+                style={{ marginTop: 15 }}
+              >
+                New game
+                <AddIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
@@ -269,7 +296,12 @@ function App() {
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
               <Typography variant='h5'>Join game</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Join an already existing game by entering the game ID below.</Typography>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Join an already existing game by entering the game ID below.
+              </Typography>
               <TextField
                 label="Game ID"
                 style={{ marginTop: 15 }}
@@ -278,7 +310,7 @@ function App() {
               />
               <Button onClick={() => {
                 joinGame(),
-                  handleLobbyOpen()
+                  handleLobbyOpen
               }}
                 color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
             </CardContent>
@@ -289,7 +321,12 @@ function App() {
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
               <Typography variant='h5'>Play local</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Create a local game to play single player against a bot. Choose bot difficulty below.</Typography>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Create a local game to play single player against a bot. Choose bot difficulty below.
+              </Typography>
               <FormControl fullWidth style={{ marginTop: 15 }}>
                 <InputLabel id="difficulty-input-label">Choose difficulty</InputLabel>
                 <Select
@@ -305,29 +342,74 @@ function App() {
                   <MenuItem value={40}>Impossible, Good Luck!</MenuItem>
                 </Select>
               </FormControl>
-              <Button onClick={handleOpen} color='success' variant='contained' style={{ marginTop: 15 }}>Play locally <SmartToyIcon /> </Button>
+              <Button
+                onClick={handleOpen}
+                color='success'
+                variant='contained'
+                style={{ marginTop: 15 }}>
+                Play locally
+                <SmartToyIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
       </Grid2>
       <div className='lobbyparagraph'>
         <p>Lobby:</p>
-        <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
-          : "No players in lobby yet"}</p>
+        <p>
+          {players && players.length > 1 ?
+            "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
+            :
+            "No players in lobby yet"}
+        </p>
         {isLobbyVisible && (
           <div>
             <div className='movementButtons'>
-              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
-              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
+              <Button
+                onClick={moveUp}
+                color='primary'
+                variant='contained'
+                style={{ marginBottom: 10 }}>
+                Down
+              </Button>
+              <Button
+                onClick={moveDown}
+                color='primary'
+                variant='contained'
+                style={{ marginBottom: 10 }}>
+                Up
+              </Button>
             </div>
             <div >
               {/* Nappien sisältämä kontti terminaalin yläpuolella */}
               <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '10px' }}>
-                <button onClick={() => handleButtonClick('play')}>Pelaa</button>
-                <button onClick={() => handleButtonClick('chat')}>Chat</button>
-                <button onClick={() => handleButtonClick('clear')}>Tyhjennä</button>
-                <button onClick={() => handleButtonClick('reset')}>Reset</button>
-                <button onClick={() => exitTerminal()}>Exit</button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('play')}
+                  disabled={players.length < 2}>
+                  Pelaa
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('chat')}>
+                  Chat
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('clear')}>
+                  Tyhjennä
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('reset')}
+                  disabled={players.length < 2}>
+                  Reset
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={(e) => exitTerminal()}>
+                  Exit
+                </Button>
               </div>
 
               {/* Terminaalikontti */}

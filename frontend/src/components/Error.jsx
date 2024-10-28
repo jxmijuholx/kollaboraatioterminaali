@@ -1,6 +1,6 @@
 import '../App.css';
-import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem, getFormControlLabelUtilityClasses } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
+import { AppBar, Typography, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 function Error() {
 
@@ -22,6 +22,14 @@ function Error() {
             </AppBar>
 
             <p>Something went wrong sadge</p>
+            <Link to={"/"}>
+                <Button
+                    variant='contained'
+                    color='success'
+                >
+                    Back to home page
+                </Button>
+            </Link>
 
             <div className='footer'>
                 <footer>

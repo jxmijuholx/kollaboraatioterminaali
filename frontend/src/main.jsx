@@ -4,7 +4,7 @@ import './index.css';
 import App from './components/App';
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Home from './components/Home';
-import Error from "./components/Error"
+import Error from './components/Error'
 
 const router = createBrowserRouter([
   {
@@ -15,7 +15,7 @@ const router = createBrowserRouter([
       {
         path: 'play',
         element: <App />
-      }
+      },
     ]
   }
 ]);
