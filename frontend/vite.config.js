@@ -7,16 +7,16 @@ export default defineConfig({
     outDir: 'dist',
   },
   server: {
-    proxy: {
-      '/auth': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/ws': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        ws: true,
-  },
-},
+//     proxy: {
+//       '/auth': {
+//         target: 'http://localhost:8080',
+//         changeOrigin: true,
+//       },
+//       '/ws': {
+//         target: 'http://localhost:8080',
+//         changeOrigin: true,
+//         ws: true,
+//   },
+// },
   },
 })
