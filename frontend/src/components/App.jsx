@@ -203,7 +203,7 @@ function App() {
         "gameID": gameID
       }
       ws.send(JSON.stringify(payload))
-      console.log("Player: " + clientId + " moved paddle " + direction)
+      // console.log("Player: " + clientId + " moved paddle " + direction)
     }
   };
 
@@ -371,14 +371,14 @@ function App() {
                 color='primary'
                 variant='contained'
                 style={{ marginBottom: 10 }}>
-                Down
+                Up
               </Button>
               <Button
                 onClick={moveDown}
                 color='primary'
                 variant='contained'
                 style={{ marginBottom: 10 }}>
-                Up
+                Down
               </Button>
             </div>
             <div >
