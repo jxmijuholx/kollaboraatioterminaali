@@ -237,6 +237,24 @@ function App() {
     setDifficulty(event.target.value)
   };
 
+  const handleKeyDown = (event) => {
+    if (event.key === 's' || event.key === 's') {
+      moveUp();
+    } else if (event.key === 'w' || event.key === 'W') {
+      moveDown();
+    }
+  };
+
+  useEffect(() => {
+    
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [clientId, gameID, ws]); 
+
   return (
     <>
 
