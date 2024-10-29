@@ -1,2 +1,4 @@
 UserStories.md
 node_modules/
+.vscode/
+.env

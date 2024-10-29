@@ -1,13 +1,15 @@
-import './App.css';
-import { Card, CardContent, AppBar, Typography, Button, Grid2, Snackbar, TextField, Select, FormControl, InputLabel, MenuItem, getFormControlLabelUtilityClasses } from '@mui/material';
-import { useState, useEffect, useRef } from 'react';
-import AddIcon from "@mui/icons-material/Add"
-import SmartToyIcon from "@mui/icons-material/SmartToy"
-import LinkIcon from "@mui/icons-material/Link"
+import AddIcon from "@mui/icons-material/Add";
+import LinkIcon from "@mui/icons-material/Link";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
+import { Button, Card, CardContent, FormControl, Grid2, InputLabel, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../App.css';
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
-import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
+import ChatTerminal from './ChatTerminal';
+import GameCanvas from './GameCanvas';
 
 function App() {
 
@@ -22,15 +24,25 @@ function App() {
   const [newGameId, setNewGameId] = useState(null);
   const [difficulty, setDifficulty] = useState("");
 
+  const username = localStorage.getItem('username')
+
   //Terminaalia varten
+  const [isLobbyVisible, setIsLobbyVisible] = useState(false);
+  const [isGameVisible, setIsGameVisible] = useState(false);
   const [isTerminalVisible, setIsTerminalVisible] = useState(false);//näytä terminaali
-  const terminalRef = useRef(null); // viitaus terminaali elementiin 
-  const term = useRef(null); // terminaali instanssi viite
-  const inputBuffer = useRef(''); // terminaalin input bufferi
+  const [action, setAction] = useState(null); // Tilanhallinta napin painalluksille
+  const [pelitila, setPelitila] = useState(null)
+  const [viesti, setViesti] = useState("");
 
   // Connect to websocket when opening page
   useEffect(() => {
-    const newWs = new WebSocket("ws://localhost:8080");
+    const storedToken = localStorage.getItem('jwt-token')
+    const parsed = JSON.parse(storedToken);
+    const token = parsed.token
+
+    // const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+    const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
+
 
     // Receive messages from websocket and print them into the console
     newWs.onmessage = (message) => {
@@ -50,7 +62,7 @@ function App() {
         case "create":
           setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
-          localStorage.setItem("game id", response.game.id)
+          localStorage.setItem("gameId", response.game.id)
           break;
 
         //Join game and set clients to players array
@@ -64,37 +76,37 @@ function App() {
               setPlayerSide(player.paddle);
             }
           });
+          setIsLobbyVisible(true);
           setIsTerminalVisible(true);//Kun liityttään niin terminaali tulee näkyviin
           break;
 
-        //Bäkkärille
+        // Bäkkärille
         case "message":
-          // nappaa clientID joko react tilasta tai localStoragesta
+          // Nappaa clientID joko React-tilasta tai localStoragesta
           const storedClientId = clientId || localStorage.getItem('clientId');
 
-          //Tässä custom prompt generointi
-          if (term.current && response.from && response.content) {
-            if (response.from !== storedClientId) {
-              const senderColor = response.from !== storedClientId ? '\x1b[32m' : '\x1b[34m'; // Vihreä omaan viestiin, sininen kaverilta
-              term.current.write(`\r\n${senderColor}${response.from}: ${response.content}\x1b[0m`);
-              // Vielä yksi rivivaihto ja sitten prompt
-              term.current.write('\r\n');
-              term.current.prompt();
-            }
+          if (response.content && response.from) {
+            // Lähetä koko viestiobjekti setViesti-funktioon
+            setViesti({
+              from: response.username,  // Lähettäjän nimi
+              content: response.content // Viestin sisältö
+            });
           }
           break;
 
-        // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
         case "update":
-          const gamestate = response.game.state
-          if (gamestate) {
-            console.log(gamestate)
-          }
+          // console.log("Liikettä");
+          setPelitila(response.game);
+          break;
+
+        // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
+        case "move":
+          console.log("ei toimi")
           break;
 
         // Print error into console if an error happens
         case "error":
-          console.log("paska ei toimi error: ", response.message)
+          console.log("ei toimi, error: ", response.message)
           break;
       }
     };
@@ -109,66 +121,11 @@ function App() {
     };
   }, []);
 
-  //Terminaalin useEffect, 
-  useEffect(() => {
-    if (isTerminalVisible && !term.current && terminalRef.current) {
-
-      //Luonti ja alustavat määritykset
-      term.current = new Terminal({
-        cursorBlink: true,
-        rows: 20,
-        cols: 80,
-        // rightClickSelectsWord: true, // hiiren oikeanappi -> mukaan jos tarvitsee kaataa tai yms.
-        convertEol: true // Kursori aina oikeaan laitaan
-      });
-
-      // Custom prompt luominen
-      term.current.open(terminalRef.current);
-      term.current.writeln('Welcome to the Kollaboration terminal, try chatting, there is no game yet :3!');
-
-      // mukautettu prompt omalla clientID:llä
-      term.current.prompt = () => {
-        const promptColor = '\x1b[34m'; // sininen
-        const promptText = `${promptColor}${clientId}:\x1b[0m $ `; // promt alku
-        term.current.write(promptText);
-      };
-
-      // Näytetään prompt heti, kun terminaali avataan ensimmäisen kerran
-      term.current.prompt();
-
-      term.current.onData((data) => {
-        if (!ws || ws.readyState !== WebSocket.OPEN || !gameID) {
-          term.current.writeln("Error: WSocket tai Peli puuttuu.");
-          return;
-        }
-
-        if (data === '\r') { // enter-painallus
-          const message = inputBuffer.current.trim();
-          if (message) {
-            sendMessage(message);
-            inputBuffer.current = ''; // tyhjennä syöttö seuraavaa varten
-          }
-
-          // siirrytään uudelle riville ennen uuden promptin näyttämistä
-          term.current.write('\r\n');
-          term.current.prompt();
-        } else if (data === '\u007F') { // takaisinpäin Backspace avulla
-          if (inputBuffer.current.length > 0) {
-            inputBuffer.current = inputBuffer.current.slice(0, -1);
-            term.current.write('\b \b');
-          }
-        } else {
-          inputBuffer.current += data;
-          term.current.write(data);
-        }
-      });
-    }
-  }, [isTerminalVisible, ws, gameID]);
-
   //lähetä viesti functio
   const sendMessage = (message) => {
     if (!gameID) {
-      term.current.writeln('Ei ole huonetta?!.');
+      console.log("ei peliä viestin lähetyksen yhteydessä")
+      //   term.current.writeln('Ei ole huonetta?!.');
       return;
     }
 
@@ -178,16 +135,38 @@ function App() {
         action: 'sendmessage',
         gameID: gameID,
         clientID: localStorage.getItem('clientId'),  // Localstorageen muistiin
+        username: username,
         content: message,
       };
       // Lähetä viesti ws kautta
       ws.send(JSON.stringify(payload));
 
     } else {
-      term.current.write('\r\n');
-      term.current.write('\b \b');
-      term.current.writeln('Kukaan ei ole vielä liitynyt huoneeseen :C');
+      console.log("error viestin lähetyksesessä")
     }
+  };
+
+
+
+  const exitTerminal = () => {
+    setIsTerminalVisible(false);
+  }
+
+  const handleButtonClick = (actionType) => {
+    setAction(actionType); // Päivitä tila napin painalluksella
+    switch (actionType) {
+      case "play":
+        exitTerminal();
+        setIsGameVisible(true);
+        break;
+      case "chat":
+        setIsTerminalVisible(true);
+        setIsGameVisible(false);
+        break;
+      default:
+        break;
+    }
+
   };
 
 
@@ -224,7 +203,7 @@ function App() {
         "gameID": gameID
       }
       ws.send(JSON.stringify(payload))
-      console.log("Player: " + clientId + " moved paddle " + direction)
+      // console.log("Player: " + clientId + " moved paddle " + direction)
     }
   };
 
@@ -260,20 +239,6 @@ function App() {
 
   return (
     <>
-      <AppBar position='fixed'
-        style={{
-          padding: 15,
-          borderRadius: 10,
-          marginTop: 4,
-          maxWidth: 1272,
-          marginRight: 4,
-          background: "#3a3a3a",
-          color: "white",
-        }}>
-        <Typography variant='h5' >
-          Collaboration terminal (Change name?)
-        </Typography>
-      </AppBar>
 
       <Snackbar
         open={open}
@@ -289,14 +254,41 @@ function App() {
         message={gameID ? "Joined lobby: " + gameID : "Enter game ID!"}
       />
 
-      <Grid2 container spacing={3}>
+      <Grid2 container spacing={4}>
+        <Grid2>
+          <Link to={'/'}>Back to home</Link>
+        </Grid2>
         <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
+          <Card style={{
+            height: 300,
+            width: 250,
+            background: "gray"
+          }}
+          >
             <CardContent>
               <Typography variant='h5'>Create game</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Create a new game and give the generated game ID to a player to let them join.</Typography>
-              {newGameId ? <Typography>Created game with ID: {newGameId}</Typography> : <Typography style={{ marginTop: 71 }}></Typography>}
-              <Button onClick={createGame} color='success' variant='contained' style={{ marginTop: 15 }}>New game <AddIcon /> </Button>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Create a new game and give the generated game ID to a player to let them join.
+              </Typography>
+              {newGameId ?
+                <Typography>
+                  Created game with ID: {newGameId}
+                </Typography>
+                :
+                <Typography style={{ marginTop: 71 }}>
+                </Typography>}
+              <Button
+                onClick={createGame}
+                color='success'
+                variant='contained'
+                style={{ marginTop: 15 }}
+              >
+                New game
+                <AddIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
@@ -305,7 +297,12 @@ function App() {
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
               <Typography variant='h5'>Join game</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Join an already existing game by entering the game ID below.</Typography>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Join an already existing game by entering the game ID below.
+              </Typography>
               <TextField
                 label="Game ID"
                 style={{ marginTop: 15 }}
@@ -314,7 +311,7 @@ function App() {
               />
               <Button onClick={() => {
                 joinGame(),
-                  handleLobbyOpen()
+                  handleLobbyOpen
               }}
                 color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
             </CardContent>
@@ -325,7 +322,12 @@ function App() {
           <Card style={{ height: 300, width: 250, background: "gray" }}>
             <CardContent>
               <Typography variant='h5'>Play local</Typography>
-              <Typography variant='body1' style={{ marginTop: 15 }}>Create a local game to play single player against a bot. Choose bot difficulty below.</Typography>
+              <Typography
+                variant='body1'
+                style={{ marginTop: 15 }}
+              >
+                Create a local game to play single player against a bot. Choose bot difficulty below.
+              </Typography>
               <FormControl fullWidth style={{ marginTop: 15 }}>
                 <InputLabel id="difficulty-input-label">Choose difficulty</InputLabel>
                 <Select
@@ -341,37 +343,83 @@ function App() {
                   <MenuItem value={40}>Impossible, Good Luck!</MenuItem>
                 </Select>
               </FormControl>
-              <Button onClick={handleOpen} color='success' variant='contained' style={{ marginTop: 15 }}>Play locally <SmartToyIcon /> </Button>
+              <Button
+                onClick={handleOpen}
+                color='success'
+                variant='contained'
+                style={{ marginTop: 15 }}>
+                Play locally
+                <SmartToyIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
       </Grid2>
       <div className='lobbyparagraph'>
         <p>Lobby:</p>
-        <p>{players && players.length > 1 ? "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
-          : "No players in lobby yet"}</p>
-        {isTerminalVisible && (
+        <p>
+          {players && players.length > 1 ?
+            "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
+            :
+            "No players in lobby yet"}
+        </p>
+        {isLobbyVisible && (
           <div>
             <div className='movementButtons'>
-              <Button onClick={moveUp} color='primary' variant='contained' style={{ marginBottom: 10 }}>Up</Button>
-              <Button onClick={moveDown} color='primary' variant='contained' style={{ marginBottom: 10 }}>Down</Button>
+              <Button
+                onClick={moveUp}
+                color='primary'
+                variant='contained'
+                style={{ marginBottom: 10 }}>
+                Up
+              </Button>
+              <Button
+                onClick={moveDown}
+                color='primary'
+                variant='contained'
+                style={{ marginBottom: 10 }}>
+                Down
+              </Button>
             </div>
-            <div className='terminaali' ref={terminalRef} style={{ width: "auto", height: "auto" }} ></div>
+            <div >
+              {/* Nappien sisältämä kontti terminaalin yläpuolella */}
+              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '10px' }}>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('play')}
+                  disabled={players.length < 2}>
+                  Pelaa
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('chat')}>
+                  Chat
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('clear')}>
+                  Tyhjennä
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => handleButtonClick('reset')}
+                  disabled={players.length < 2}>
+                  Reset
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={(e) => exitTerminal()}>
+                  Exit
+                </Button>
+              </div>
+
+              {/* Terminaalikontti */}
+
+              {isTerminalVisible && <ChatTerminal username={username} sendMessage={sendMessage} action={action} viesti={viesti} />}
+              {isGameVisible && <GameCanvas pelitila={pelitila} />}
+            </div>
           </div>
         )}
-      </div>
-      <div className='footer'>
-        <footer>
-          <p>
-            Contributors:
-          </p>
-          <div className='footerLinks'>
-            <a href="https://github.com/AbuAk1"> @AbuAk1 </a>
-            <a href="https://github.com/jxmijuholx"> @jxmijuholx </a>
-            <a href="https://github.com/Santks"> @Santks </a>
-            <a href="https://github.com/Tuutej"> @Tuutej</a>
-          </div>
-        </footer>
       </div>
     </>
   );
