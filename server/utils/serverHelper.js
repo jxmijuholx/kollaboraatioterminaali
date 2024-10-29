@@ -75,7 +75,10 @@ function joinGame(result, connection) {
             }
         });
 
-        if (game.clients.length === 2) updateGameState();
+        if (game.clients.length === 2) {
+            updateGameState();
+            // updateBallPosition(gameID);  
+        }
 
         console.log(`Client ${clientID} (${username}) joined game ${gameID}`);
 
@@ -108,8 +111,99 @@ function playGame(result) {
 function updateGameState() {
     try {
         games.forEach((game, gameID) => {
-            updateBallPosition(gameID);
 
+
+            const CANVAS_HEIGHT = 400;
+            const CANVAS_WITH = 600;
+
+            const BALL_START_X = CANVAS_WITH / 2;
+            const BALL_START_Y = CANVAS_HEIGHT / 2;
+            const BALL_START_X_DIR = Math.random() < 0.5 ? 1 : -1;
+            const BALL_START_Y_DIR = Math.random() < 0.5 ? 1 : -1;
+            const BALL_SPEED = 4; // HUOM! laita parillinen luku :] muuten hajoaa
+
+            const PADDLE_HEIGHT = 50;
+
+            let LEFT_PADDLE_POS_Y = 4;
+            let RIGHT_PADDLE_POS_Y = 4;
+
+            let LEFT_PADDLE_POS_X = 0;
+            let RIGHT_PADDLE_POS_X = 600;
+
+            let SCORE = false;
+
+
+            if (!game.state.ball) {
+                game.state.ball = {
+                    x: BALL_START_X,
+                    y: BALL_START_Y,
+                    dx: BALL_START_X_DIR,
+                    dy: BALL_START_Y_DIR,
+                    speed: BALL_SPEED
+                };
+            }
+
+            // Pallon tilan päivitys
+            const ball = game.state.ball;
+            ball.x += ball.dx * BALL_SPEED;
+            ball.y += ball.dy * BALL_SPEED;
+            
+            // Ylä- ja alareunoihin törmäys
+            if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
+                ball.dy *= -1;
+            }
+
+            // Pelaajien positioiden haku
+            const playerPositionsInt = Object.entries(game.state)
+                .filter(([key]) => key !== "ball")
+                .map(([clientID, clientData]) => clientData.position);
+
+            // Pelaajien positiot int arvoina 0- 8 välillä
+            const p1_INT = playerPositionsInt[0] || 0;
+            const p2_INT = playerPositionsInt[1] || 0;
+
+            //Skaalataan int positio kolladereita varten -> Näiden muuttelu pitää tehdä myös frontendissä
+            LEFT_PADDLE_POS_Y = p1_INT * PADDLE_HEIGHT;
+            RIGHT_PADDLE_POS_Y = p2_INT * PADDLE_HEIGHT;
+
+            // Törmäys vasemman mailan kanssa
+            //Eka tarkistetaan x akseli ja sitten y akseli mailan kanssa ja mailan pituus huomioiden
+            if (ball.x == LEFT_PADDLE_POS_X) {
+                if (ball.y <= LEFT_PADDLE_POS_Y +PADDLE_HEIGHT && ball.y >= LEFT_PADDLE_POS_Y - PADDLE_HEIGHT ) {
+                    ball.dx = -ball.dx;
+                    SCORE= false;
+                }else {
+                    SCORE= true;
+                    // console.log(ball.x + " " + ball.y+" vasenmaila "+LEFT_PADDLE_POS_X +" "+LEFT_PADDLE_POS_Y +" Oikeamaila "+RIGHT_PADDLE_POS_X +" "+RIGHT_PADDLE_POS_Y);
+
+                }    
+            }
+           
+
+            // Törmäys oikean mailan kanssa
+            //Eka tarkistetaan x akseli ja sitten y akseli mailan kanssa ja mailan pituus huomioiden
+            if (ball.x == RIGHT_PADDLE_POS_X) {
+                if (ball.y <= RIGHT_PADDLE_POS_Y +PADDLE_HEIGHT && ball.y >= RIGHT_PADDLE_POS_Y - PADDLE_HEIGHT) {
+                    ball.dx = -ball.dx;
+                    SCORE= false;
+                }else {
+                    SCORE= true;
+                    // console.log(ball.x + " " + ball.y+" vasenmaila "+LEFT_PADDLE_POS_X +" "+LEFT_PADDLE_POS_Y +" Oikeamaila "+RIGHT_PADDLE_POS_X +" "+RIGHT_PADDLE_POS_Y);
+
+                }   
+            }
+
+            // Maali, pallo palaa keskelle
+            if (SCORE) {
+                // console.log("SCORE!!!");
+                ball.x = BALL_START_X;
+                ball.y = BALL_START_Y;
+                ball.dx = BALL_START_X_DIR;
+                ball.dy = BALL_START_Y_DIR;
+                SCORE = false;
+            }
+
+            
 
             const gameState = {
                 id: game.id,
@@ -129,7 +223,7 @@ function updateGameState() {
                 }
             });
         });
-        setTimeout(updateGameState, 100);
+        setTimeout(updateGameState, 1000 / 60);
     } catch (error) {
         console.error('Error updating game state:', error.message);
     }
@@ -191,17 +285,18 @@ function movePaddle(result) {
         const game = games.get(gameID);
         if (!game) throw new Error("Game not found");
 
-        game.state[clientID] = game.state[clientID] || { position: 0 };
+        game.state[clientID] = game.state[clientID] || { position: 4 };
 
+        //muutettu asteikko 0 ja 8 välille selkeyden vuoksi
         if (direction === 'up') {
-            game.state[clientID].position = Math.max(game.state[clientID].position - 1, -8);
-        } else if (direction === 'down') {
             game.state[clientID].position = Math.min(game.state[clientID].position + 1, 8);
+        } else if (direction === 'down') {
+            game.state[clientID].position = Math.max(game.state[clientID].position - 1, 0);
         } else {
             throw new Error("Unknown direction");
         }
 
-        console.log(`Player ${clientID} moved ${direction}. New position: ${game.state[clientID].position}`);
+        // console.log(`Player ${clientID} moved ${direction}. New position: ${game.state[clientID].position}`);
 
         const payload = {
             action: "update",
@@ -223,9 +318,10 @@ function movePaddle(result) {
     }
 }
 
+/*
 function updateBallPosition(gameID) {
     const game = games.get(gameID)
-    if (!game) return;
+    if (!game) return console.log("ei palloa");
 
 // pallo pelin alussa
 
@@ -272,6 +368,9 @@ if (!game.state.ball) {
         ball.dx = -ball.dx; // pallon suunta
     }
 
+    console.log(`Ball position: x=${ball.x}, y=${ball.y}, dx=${ball.dx}, dy=${ball.dy}`);
+
+
     const payload = {
         action: "update",
         game: {
@@ -280,6 +379,7 @@ if (!game.state.ball) {
             state: game.state
         }
     };
+
     game.clients.forEach(c => {
         const clientConnection = clients.get(c.clientID).connection;
         if (clientConnection && clientConnection.connected) {
@@ -288,6 +388,7 @@ if (!game.state.ball) {
     });
 
 }
+*/
 
 
 
@@ -311,5 +412,5 @@ module.exports = {
     updateGameState,
     cleanupEmptyGames,
     clients,
-    games
+    games,
 };

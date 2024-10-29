@@ -40,7 +40,8 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+    // const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+    const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
 
 
     // Receive messages from websocket and print them into the console
@@ -202,7 +203,7 @@ function App() {
         "gameID": gameID
       }
       ws.send(JSON.stringify(payload))
-      console.log("Player: " + clientId + " moved paddle " + direction)
+      // console.log("Player: " + clientId + " moved paddle " + direction)
     }
   };
 
@@ -370,14 +371,14 @@ function App() {
                 color='primary'
                 variant='contained'
                 style={{ marginBottom: 10 }}>
-                Down
+                Up
               </Button>
               <Button
                 onClick={moveDown}
                 color='primary'
                 variant='contained'
                 style={{ marginBottom: 10 }}>
-                Up
+                Down
               </Button>
             </div>
             <div >

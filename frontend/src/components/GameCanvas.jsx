@@ -2,74 +2,72 @@ import React, { useEffect, useRef } from 'react';
 
 const GameCanvas = ({ pelitila }) => {
   const canvasRef = useRef(null);
-  const paddleHeight = 100;
-  const paddleWidth = 10;
+  const paddleHeight = 50; // sama kuin servulla
+  const paddleWidth = 20; 
   const canvasWidth = 600;
   const canvasHeight = 400;
   const ballRadius = 10;
 
-
-  // Poimitaan pelaajien positiot pelitilasta
-  const positions = Object.entries(pelitila.state).map(([clientID, clientData]) => {
-    return {
+  // Pelitilan positiot, otetaan ensimmäinen arvo 'ball' pois
+  const positions = Object.entries(pelitila.state)
+    .filter(([key]) => key !== 'ball')
+    .map(([clientID, clientData]) => ({
       clientID: clientID,
-      position: clientData.position
-    };
-  });
+      position: clientData.position,
+    }));
 
-  const ball = pelitila.state.ball || { x: canvasWidth / 2, y: canvasHeight / 2 }; // pallo lokaatio, jos palloa ei olemassa spawnaa pallon keskelle
+  // Pelaajien positiot, oletus asetettu pohjalle ja kun ekan kerran painaa niin pomppaa keskelle
+  const p1 = positions[0]?.position || 0;
+  const p2 = positions[1]?.position || 0;
 
-  const currentClientId = localStorage.getItem('clientId');
-  const pelaaja1 = positions.find(p => p.clientID === localStorage.getItem('clientId')) || { position: 0 };
-  const pelaaja2 = positions.find(p => p.clientID !== localStorage.getItem('clientId')) || { position: 0 };
-
-  const drawPaddles = (ctx, leftPaddleY, rightPaddleY) => {
-    // Tyhjennetään canvas
+  // Piirrää pelaajat
+  const drawPaddles = (ctx, p1, p2) => {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    // Piirretään vasen maila pelaaja1:n sijainnin mukaan
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(10, leftPaddleY, paddleWidth, paddleHeight);
+    
+    // Vasemman mailan x-sijainti, hieman irti vasemmasta 0 reunasta + 10
+    const LPX_pos = 10;
+    // Oikean mailan x-sijainti ja pemustetta -10
+    const RPX_pos = canvasWidth - paddleWidth - 10;
 
-    // Piirretään oikea maila pelaaja2:n sijainnin mukaan
+    // Skaalataan p1 ja p2 kanvasin korkeudelle
+    const positionScale = (canvasHeight - paddleHeight) / 8;
+    //Ehtolauseet 0 arvoille, muuten pomppaa keskelle kun position arvo on 0
+    const leftPaddleY = p1 === 0 ? canvasHeight - paddleHeight : canvasHeight - (p1 * positionScale) - paddleHeight;
+    const rightPaddleY = p2 === 0 ? canvasHeight - paddleHeight : canvasHeight - (p2 * positionScale) - paddleHeight;
+
+
+    // Piirretään vasen maila
+    ctx.fillStyle = 'blue';
+    //eka arvo on vasemman reunan x akseli ja toinen arvo on vasemman reunan y akseli
+    ctx.fillRect(LPX_pos, leftPaddleY, paddleWidth, paddleHeight);
+
+    // Piirretään oikea maila
     ctx.fillStyle = 'red';
-    ctx.fillRect(canvasWidth - paddleWidth - 10, rightPaddleY, paddleWidth, paddleHeight);
+    //eka arvo on vasemman reunan x akseli ja toinen arvo on vasemman reunan y akseli
+    ctx.fillRect(RPX_pos, rightPaddleY, paddleWidth, paddleHeight);
   };
 
-  const drawBall = (ctx) => {
+  // Piirrä pallo
+  const drawBall = (ctx, ball) => {
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ballRadius, 0, Math.PI * 2); // pyöreä pallo
+    const adjustedY = canvasHeight - ball.y; // pyöräyttää ympäri että piirto vastaa saatuja koordinaatteja
+    ctx.arc(ball.x, adjustedY, ballRadius, 0, Math.PI * 2);
     ctx.fillStyle = 'white';
     ctx.fill();
     ctx.closePath();
   };
 
+  // Piirretään mailat ja pallo käyttäen päivitettyä pelitilaa
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
-    // Muunnetaan position-arvot canvasin koordinaateiksi
-    const leftPaddleY = Math.max(
-      0,
-      Math.min(
-        (canvasHeight / 2) - (pelaaja1.position * (canvasHeight / 20)) - (paddleHeight / 2),
-        canvasHeight - paddleHeight
-      )
-    );
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Tyhjennetään canvas jokaisen piirron välillä
+    drawPaddles(ctx, p1, p2);
+    drawBall(ctx, pelitila.state.ball); // Piirretään pallo koordinaattien mukaan
 
-    const rightPaddleY = Math.max(
-      0,
-      Math.min(
-        (canvasHeight / 2) - (pelaaja2.position * (canvasHeight / 20)) - (paddleHeight / 2),
-        canvasHeight - paddleHeight
-      )
-    );
-
-
-    // Piirretään päivitetyt mailat
-    drawPaddles(ctx, leftPaddleY, rightPaddleY);
-    drawBall(ctx, ball.x, ball.y);
-  }, [pelaaja1, pelaaja2, pelitila]); // Päivitetään aina kun pelaaja1 tai pelaaja2 muuttuu
+  }, [pelitila]);
 
   return (
     <canvas
@@ -77,8 +75,7 @@ const GameCanvas = ({ pelitila }) => {
       width={canvasWidth}
       height={canvasHeight}
       style={{ border: '1px solid white', backgroundColor: 'black' }}
-    >
-    </canvas>
+    />
   );
 };
 
