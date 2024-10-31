@@ -40,8 +40,8 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-    // const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
-    const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
+    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+    // const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
 
 
     // Receive messages from websocket and print them into the console
@@ -236,6 +236,24 @@ function App() {
   const handleDifficultyChange = (event) => {
     setDifficulty(event.target.value)
   };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 's' || event.key === 's') {
+      moveUp();
+    } else if (event.key === 'w' || event.key === 'W') {
+      moveDown();
+    }
+  };
+
+  useEffect(() => {
+    
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [clientId, gameID, ws]); 
 
   return (
     <>
