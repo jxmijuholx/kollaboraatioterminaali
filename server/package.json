@@ -8,9 +8,9 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "build:ui": "rm -rf dist && cd ../frontend && npm install && npm run build && cp -r dist ../server",
-    "deploy": "flyctl deploy",
+    "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "flyctl logs"
+    "logs:prod": "fly logs"
   },
   "author": "",
   "license": "MIT",
