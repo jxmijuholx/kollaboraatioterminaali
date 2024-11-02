@@ -30,10 +30,8 @@ jobs:
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: |
-          export FLYCTL_INSTALL="/root/.fly"
-          export PATH="$FLYCTL_INSTALL/bin:$PATH"
           cd server
-          fly deploy --remote-only
+          npm run deploy:full
 
       - name: Wait for deployment
         run: sleep 30
