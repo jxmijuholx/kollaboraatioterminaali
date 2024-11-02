@@ -4,9 +4,20 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+      
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy-and-test:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -58,3 +69,4 @@ jobs:
           name: playwright-report
           path: e2e-tests/playwright-report/
           retention-days: 30
+        
