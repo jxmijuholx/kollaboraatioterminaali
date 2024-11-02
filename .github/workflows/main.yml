@@ -49,7 +49,7 @@ jobs:
           cd e2e-tests
           npm ci
           npx playwright install --with-deps
-          npm run test
+          npx playwright test
 
       - name: Upload test results
         if: always()
