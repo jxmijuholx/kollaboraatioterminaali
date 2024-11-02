@@ -33,7 +33,7 @@ jobs:
           export FLYCTL_INSTALL="/root/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
           cd server
-          flyctl deploy --remote-only
+          fly deploy --remote-only
 
       - name: Wait for deployment
         run: sleep 30
