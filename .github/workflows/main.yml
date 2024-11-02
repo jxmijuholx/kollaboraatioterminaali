@@ -9,7 +9,9 @@ jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -24,7 +26,9 @@ jobs:
           npm ci
 
       - name: Install Fly CLI
-        run: curl -L https://fly.io/install.sh | sh
+        run: |
+          curl -L https://fly.io/install.sh | sh
+          export PATH="$HOME/.fly/bin:$PATH"
 
       - name: Deploy to fly.io
         env:
