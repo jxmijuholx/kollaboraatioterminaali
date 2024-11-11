@@ -1,12 +1,12 @@
-
 import '../App.css';
-import { AppBar, Typography, Button, TextField, Box, Toolbar } from '@mui/material';
+import { AppBar, Typography, Button, TextField, Box, Toolbar, List, ListItem } from '@mui/material';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import '../App.css';
 import Login from './Login';
 import Register from './Register';
+import { generateName } from './DisplayNameGenerator';
 
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import LoginIcon from '@mui/icons-material/Login';
@@ -20,66 +20,23 @@ function Home() {
     const [registerOpen, setRegisterOpen] = useState(false);
     const [username, setUsername] = useState("");
 
-    // Arrays for random display name generation
-    const words = [
-        "ocean",
-        "mountain",
-        "giraffe",
-        "keyboard",
-        "sunshine",
-        "galaxy",
-        "puzzle",
-        "whisper",
-        "journey",
-        "rhythm",
-        "tiger",
-        "umbrella",
-        "volcano",
-        "horizon",
-        "butterfly",
-        "river",
-        "forest",
-        "adventure",
-        "harmony",
-        "spark"
-    ];
-
-    const adjectives = [
-        "brilliant",
-        "curious",
-        "fearless",
-        "gentle",
-        "vibrant",
-        "mysterious",
-        "silent",
-        "playful",
-        "graceful",
-        "bold",
-        "radiant",
-        "calm",
-        "elegant",
-        "fierce",
-        "joyful",
-        "persistent",
-        "wise",
-        "wild",
-        "cheerful",
-        "daring",
-        "goofy",
-        "serene",
-        "swift",
-        "vast",
-        "whimsical",
-    ];
-
     const location = useLocation();
 
     const loginLink = 'https://kollabterm.fly.dev/auth/login'
     const registerLink = 'https://kollabterm.fly.dev/auth/register'
 
+    // Check localstorage for token to see if user is logged in so that refreshing page doesnt "log user out"
+    useEffect(() => {
+        const token = localStorage.getItem("jwt-token");
+        const user = localStorage.getItem("username");
+        if (token && user) {
+            setLoggedIn(true);
+            setUsername(user);
+        }
+    }, []);
+
     // Dialog handler
     const handleOpenRegister = () => {
-        setLoginOpen(false);
         setRegisterOpen(true);
     };
 
@@ -103,6 +60,7 @@ function Home() {
                 localStorage.setItem('jwt-token', JSON.stringify(token));
                 setUsername(username);
                 setLoggedIn(true);
+                localStorage.setItem("username", username)
                 return true;
             } else {
                 console.log("User credentials not found, register or check for spelling errors");
@@ -154,16 +112,15 @@ function Home() {
     };
 
     // Generate a random display name for the user
-    const generateName = () => {
-        const random = adjectives[Math.floor(Math.random() * adjectives.length)] + "-" + words[Math.floor(Math.random() * words.length)]
+    const handleGenerateName = () => {
+        const random = generateName()
         setUsername(random)
     };
 
     // Check if user is logged in before letting them access play page
-    const loginCheck = (event) => {
+    const usernameCheck = (event) => {
         if (!username || loggedIn === false) {
             event.preventDefault();
-            alert("Please log in before playing.")
         } else {
             localStorage.setItem("username", username)
         }
@@ -179,12 +136,12 @@ function Home() {
                     color: "white",
                     marginBottom: 20
                 }}>
-                <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Box style={{ flexGrow: 2 }}></Box>
-                    <Typography variant='h4' align='center'>
-                        Collaboration terminal (Change name?)
+                <Toolbar style={{ display: 'flex', justifyContent: 'space-evenly' }}>
+                    <Box style={{ flexGrow: 1 }}></Box>
+                    <Typography variant='h4'>
+                        Kollabterm
                     </Typography>
-                    <Box style={{ flexGrow: 1 }} display="flex" justifyContent="flex-end" >
+                    <Box flexGrow={1} display="flex" justifyContent="flex-end" >
                         {loggedIn ?
                             <Link to={"/"}>
                                 <Button
@@ -200,7 +157,7 @@ function Home() {
                                 <LoginIcon />
                             </Button>
                         }</Box>
-                    <Login open={loginOpen} handleLogin={handleLogin} closeLogin={() => setLoginOpen(false)} openRegister={handleOpenRegister} />
+                    <Login open={loginOpen} handleLogin={handleLogin} closeLogin={() => setLoginOpen(false)} />
                     <Register open={registerOpen} handleRegister={handleRegister} closeRegister={() => setRegisterOpen(false)} />
                     <Register />
                 </Toolbar>
@@ -219,10 +176,10 @@ function Home() {
                         <Typography
                             variant="h6"
                             sx={{ marginBottom: 2 }}>
-                            {username ? "Welcome " + username + "!" : "Choose username!"}
+                            {username ? "Welcome " + username + "!" : "Choose display name!"}
                         </Typography>
                         <TextField
-                            label='Type username...'
+                            label='Type display name...'
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             sx={{ marginBottom: 2, width: '100%' }}
@@ -231,18 +188,26 @@ function Home() {
                             <Button
                                 variant="contained"
                                 color="warning"
-                                onClick={generateName}
+                                onClick={handleGenerateName}
                                 sx={{ display: 'flex', alignItems: 'center', marginRight: 2 }}
                             >
                                 Random name
                                 <AutorenewIcon />
                             </Button>
                             <Link
-                                onClick={loginCheck}
-                                to='/play'>
+                                onClick={(e) => {
+                                    if (!loggedIn) {
+                                        e.preventDefault();
+                                    } else {
+                                        usernameCheck();
+                                    }
+                                }}
+                                to='/play'
+                            >
                                 <Button
                                     variant='contained'
                                     color='success'
+                                    disabled={!loggedIn}
                                 >
                                     Start playing!
                                 </Button>
@@ -252,38 +217,33 @@ function Home() {
 
                     <Box
                         display={'flex'}
-                        justifyContent={'space-between'}
+                        justifyContent={'center'}
                         marginTop={3}
                         marginBottom={5}>
-                        <Box sx={{ border: 3, borderRadius: 2, width: '45%', padding: 2 }}>
+                        <Box sx={{ border: 3, borderRadius: 2, width: 'auto', padding: 2 }}>
                             <Typography variant='h4'>How to play?</Typography>
                             <Typography variant='h6' >
-                                {`Start playing by creating an account and choosing a display name orgenerate a random display name with the "random name" button
-                            and then click start playing to navigate to the game setup menu!
-  
-                            Once in the game setup menu you can create a game or join an existing game by inserting a join code 
-                            into the textbox and pressing the join button.
-                            
-                            After the game lobby is full, you can chat with each other via the on-screen terminal or start the game
-                            by typing the "start game" command into the terminal.
-  
-                             Enjoy!`}
-                            </Typography>
-                        </Box>
-
-                        <Box sx={{
-                            border: 3,
-                            borderRadius: 2,
-                            width: '45%',
-                            padding: 2
-                        }}
-                        >
-                            <Typography variant='h4'>About collaboration terminal:</Typography>
-                            <Typography variant='h6'>
-                                {`Collaboration terminal is a terminal-based Pong game designed for two players to enjoy a classic game of Pong through web-sockets.
-                                
-                                Collaboration terminal was developed to explore and apply our knowledge in practice, as part of a university course. 
-                                The project challenged us to integrate web-sockets for real-time communication and create a functional, multiplayer Pong game with a terminal-based interface. `}
+                                <List >
+                                    <ListItem>- Get started by logging in or creating an account:
+                                        <Button
+                                            style={{ marginLeft: 5 }}
+                                            variant="contained"
+                                            color="secondary"
+                                            onClick={handleOpenRegister}
+                                        >
+                                            Create account
+                                        </Button></ListItem>
+                                    <ListItem>- After logging in successfully choose a display name (or keep your login username)</ListItem>
+                                    <ListItem>- Click on "start playing" after you have logged in and chosen a display name.</ListItem>
+                                    <ListItem>- You will be taken to a "play" page where you have the option to create or join a game.</ListItem>
+                                    <ListItem>- To create a game click the "create game" button and copy the code to the textbox above the "join game" button</ListItem>
+                                    <ListItem>- The click the "join game" button to join the newly created lobby</ListItem>
+                                    <ListItem>- Wait for the other player to join and press the "ready" button. (The game will start after both players are ready)</ListItem>
+                                    <ListItem>- You chat to the other player via the on-screen terminal</ListItem>
+                                    <ListItem>- If you want to join a game you need the lobby code from the other player</ListItem>
+                                    <ListItem>- After getting the code, type or paste it into the textbox above the "join game" button and press "join game"</ListItem>
+                                    <ListItem>- Enjoy!</ListItem>
+                                </List>
                             </Typography>
                         </Box>
                     </Box>
