@@ -2,7 +2,6 @@ import AddIcon from "@mui/icons-material/Add";
 import LinkIcon from "@mui/icons-material/Link";
 import { Button, Card, CardContent, Grid2, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import '../App.css';
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
@@ -255,15 +254,11 @@ function App() {
         message={gameID ? "Joined lobby: " + gameID : "Enter game ID!"}
       />
 
-      <Grid2 container spacing={4}>
-        <Grid2>
-          <Link to={'/'}>Back to home</Link>
-        </Grid2>
+      <Grid2 container spacing={4} justifyContent={'center'}>
         <Grid2 xs={12} sm={6} md={3}>
           <Card style={{
             height: 300,
             width: 250,
-            background: "gray"
           }}
           >
             <CardContent>
@@ -295,7 +290,7 @@ function App() {
         </Grid2>
 
         <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
+          <Card style={{ height: 300, width: 250 }}>
             <CardContent>
               <Typography variant='h5'>Join game</Typography>
               <Typography
@@ -347,7 +342,7 @@ function App() {
             </div>
             <div >
               {/* Nappien sisältämä kontti terminaalin yläpuolella */}
-              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
                 <Button
                   variant="contained"
                   onClick={() => handleButtonClick('play')}

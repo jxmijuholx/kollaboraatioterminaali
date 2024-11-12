@@ -132,12 +132,25 @@ function Home() {
                 style={{
                     padding: 15,
                     borderRadius: 10,
-                    background: "#3a3a3a",
-                    color: "white",
-                    marginBottom: 20
+                    marginBottom: 20,
+                    minWidth: '1200px'
                 }}>
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                    <Box style={{ flexGrow: 1 }}></Box>
+                    {location.pathname === "/play" ?
+                        <Box style={{ flexGrow: 1 }}>
+                            <Link to={'/'}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                    justifyContentent='flex-start'
+                                >
+                                    Back to home
+                                </Button>
+                            </Link>
+                        </Box>
+                        :
+                        <Box style={{ flexGrow: 1 }}></Box>
+                    }
                     <Typography variant='h4'>
                         Kollabterm
                     </Typography>
@@ -220,7 +233,7 @@ function Home() {
                         justifyContent={'center'}
                         marginTop={3}
                         marginBottom={5}>
-                        <Box sx={{ border: 3, borderRadius: 2, width: 'auto', padding: 2 }}>
+                        <Box sx={{ width: 'auto', alignItems: 'center' }}>
                             <Typography variant='h4'>How to play?</Typography>
                             <Typography variant='h6' >
                                 <List >
@@ -228,7 +241,6 @@ function Home() {
                                         <Button
                                             style={{ marginLeft: 5 }}
                                             variant="contained"
-                                            color="secondary"
                                             onClick={handleOpenRegister}
                                         >
                                             Create account
@@ -239,7 +251,7 @@ function Home() {
                                     <ListItem>- To create a game click the "create game" button and copy the code to the textbox above the "join game" button</ListItem>
                                     <ListItem>- The click the "join game" button to join the newly created lobby</ListItem>
                                     <ListItem>- Wait for the other player to join and press the "ready" button. (The game will start after both players are ready)</ListItem>
-                                    <ListItem>- You chat to the other player via the on-screen terminal</ListItem>
+                                    <ListItem>- You can chat to the other player via the on-screen terminal</ListItem>
                                     <ListItem>- If you want to join a game you need the lobby code from the other player</ListItem>
                                     <ListItem>- After getting the code, type or paste it into the textbox above the "join game" button and press "join game"</ListItem>
                                     <ListItem>- Enjoy!</ListItem>
