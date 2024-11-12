@@ -1,23 +1,24 @@
 const fs = require('fs');
-const { get } = require('http');
 const path = require('path');
 
 const clients = new Map();
 const games = new Map();
 
-function getRandomName() {
-    const namesFilePath = path.join(__dirname, 'random_names.txt');
-    const fileContent = fs.readFileSync(namesFilePath, 'utf8');
-    const names = fileContent.split('\n').map(name => name.trim()).filter(name => name);
+function getRandomName(){
 
-    const randomIndex = Math.floor(Math.random() * names.length);
-    return names[randomIndex];
+    const names_file_path = path.join(__dirname, 'random_names.txt');
+    const file_content = fs.readFileSync(names_file_path, 'utf8');
+    const names = file_content.split('\n').map(name => name.trim()).filter(name => name)
+    const random = Math.floor(Math.random() * names.length);
+    return names[random];
+
 }
 
 function createGame(result, connection) {
     try {
         const clientID = result.clientID;
         const username = result.username;
+        const gameID = getRandomName();
         const gameID = getRandomName();
 
         const game = {
