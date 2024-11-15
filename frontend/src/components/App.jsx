@@ -1,9 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import LinkIcon from "@mui/icons-material/Link";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import { Button, Card, CardContent, FormControl, Grid2, InputLabel, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, Grid2, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import '../App.css';
 
 //käytetään näitä terminaalin importtaukseen toistaiseksi. Nää ainakin jotenkin toimii
@@ -22,7 +20,6 @@ function App() {
   const [lobbyOpen, setLobbyOpen] = useState(false);
   const [gameID, setGameID] = useState("");
   const [newGameId, setNewGameId] = useState(null);
-  const [difficulty, setDifficulty] = useState("");
 
   const username = localStorage.getItem('username')
 
@@ -97,11 +94,6 @@ function App() {
         case "update":
           // console.log("Liikettä");
           setPelitila(response.game);
-          break;
-
-        // turha atm, tekee konsolista hankalasti luettavan, mutta poistaa error messaget frontin konsolista xd
-        case "move":
-          console.log("ei toimi")
           break;
 
         // Print error into console if an error happens
@@ -217,12 +209,7 @@ function App() {
     movePaddle("down")
   };
 
-
-  // Snackbar handlers
-  const handleOpen = () => {
-    setOpen(true);
-  };
-
+  // Lobby handlers
   const handleLobbyOpen = () => {
     setLobbyOpen(true)
   };
@@ -232,28 +219,23 @@ function App() {
     setLobbyOpen(false)
   };
 
-  // Handle change to difficulty option
-  const handleDifficultyChange = (event) => {
-    setDifficulty(event.target.value)
-  };
-
   const handleKeyDown = (event) => {
-    if (event.key === 's' || event.key === 's') {
+    if (event.key === 'w' || event.key === 'W') {
       moveUp();
-    } else if (event.key === 'w' || event.key === 'W') {
+    } else if (event.key === 's' || event.key === 'S') {
       moveDown();
     }
   };
 
   useEffect(() => {
-    
+
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      
+
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [clientId, gameID, ws]); 
+  }, [clientId, gameID, ws]);
 
   return (
     <>
@@ -272,15 +254,11 @@ function App() {
         message={gameID ? "Joined lobby: " + gameID : "Enter game ID!"}
       />
 
-      <Grid2 container spacing={4}>
-        <Grid2>
-          <Link to={'/'}>Back to home</Link>
-        </Grid2>
+      <Grid2 container spacing={4} justifyContent={'center'}>
         <Grid2 xs={12} sm={6} md={3}>
           <Card style={{
             height: 300,
             width: 250,
-            background: "gray"
           }}
           >
             <CardContent>
@@ -312,7 +290,7 @@ function App() {
         </Grid2>
 
         <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
+          <Card style={{ height: 300, width: 250 }}>
             <CardContent>
               <Typography variant='h5'>Join game</Typography>
               <Typography
@@ -335,49 +313,12 @@ function App() {
             </CardContent>
           </Card>
         </Grid2>
-
-        <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
-            <CardContent>
-              <Typography variant='h5'>Play local</Typography>
-              <Typography
-                variant='body1'
-                style={{ marginTop: 15 }}
-              >
-                Create a local game to play single player against a bot. Choose bot difficulty below.
-              </Typography>
-              <FormControl fullWidth style={{ marginTop: 15 }}>
-                <InputLabel id="difficulty-input-label">Choose difficulty</InputLabel>
-                <Select
-                  labelId='difficulty-input-label'
-                  id='difficulty-select'
-                  label='Choose difficulty'
-                  value={difficulty}
-                  onChange={handleDifficultyChange}
-                >
-                  <MenuItem value={10}>Easy</MenuItem>
-                  <MenuItem value={20}>Medium</MenuItem>
-                  <MenuItem value={30}>Hard</MenuItem>
-                  <MenuItem value={40}>Impossible, Good Luck!</MenuItem>
-                </Select>
-              </FormControl>
-              <Button
-                onClick={handleOpen}
-                color='success'
-                variant='contained'
-                style={{ marginTop: 15 }}>
-                Play locally
-                <SmartToyIcon />
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid2>
       </Grid2>
       <div className='lobbyparagraph'>
         <p>Lobby:</p>
         <p>
           {players && players.length > 1 ?
-            "Player 1: " + players[0].clientID + ", " + players[0].paddle + " | " + " Player 2: " + players[1].clientID + ", " + players[1].paddle
+            "Player 1: " + players[0].username + ", " + players[0].paddle + " | " + " Player 2: " + players[1].username + ", " + players[1].paddle
             :
             "No players in lobby yet"}
         </p>
@@ -401,7 +342,7 @@ function App() {
             </div>
             <div >
               {/* Nappien sisältämä kontti terminaalin yläpuolella */}
-              <div style={{ display: 'flex', justifyContent: 'flex-start', padding: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
                 <Button
                   variant="contained"
                   onClick={() => handleButtonClick('play')}
@@ -433,7 +374,7 @@ function App() {
 
               {/* Terminaalikontti */}
 
-              {isTerminalVisible && <ChatTerminal username={username} sendMessage={sendMessage} action={action} viesti={viesti} />}
+              {isTerminalVisible && <ChatTerminal username={localStorage.getItem("username")} sendMessage={sendMessage} action={action} viesti={viesti} />}
               {isGameVisible && <GameCanvas pelitila={pelitila} />}
             </div>
           </div>

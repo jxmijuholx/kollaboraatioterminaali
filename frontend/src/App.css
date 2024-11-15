@@ -1,5 +1,4 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -7,10 +6,8 @@
 }
 
 .footer {
-  background-color: #3a3a3a;
   padding: 1rem;
   position: relative;
-  color: white;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28,7 +25,6 @@
 }
 
 .lobbyparagraph {
-  color: white;
   font-size: medium;
   font-weight: bold;
 }
@@ -51,27 +47,40 @@
 
 /* Kontti, jossa komponentit ovat vierekkäin */
 .test-components {
-  display: flex; /* Flexbox, joka asettaa komponentit rinnakkain */
-  justify-content: space-between; /* Jakaa tilan tasaisesti komponenttien välillä */
-  padding: 20px; /* Lisää sisäistä marginaalia */
-  gap: 20px; /* Välit komponenttien välillä */
+  display: flex;
+  /* Flexbox, joka asettaa komponentit rinnakkain */
+  justify-content: space-between;
+  /* Jakaa tilan tasaisesti komponenttien välillä */
+  padding: 20px;
+  /* Lisää sisäistä marginaalia */
+  gap: 20px;
+  /* Välit komponenttien välillä */
 }
 
 /* GameCanvasin tyylit */
 .gamecanvas {
-  flex: 1; /* Komponentti vie tilaa tasaisesti flex-kontissa */
-  font-size: 12px; /* Pienempi fonttikoko */
+  flex: 1;
+  /* Komponentti vie tilaa tasaisesti flex-kontissa */
+  font-size: 12px;
+  /* Pienempi fonttikoko */
   padding: 10px;
-  border: 1px solid #ccc; /* Ohut harmaa reuna */
-  background-color: #f9f9f9; /* Vaalea taustaväri */
-  border-radius: 5px; /* Pyöristetyt reunat */
+  border: 1px solid #ccc;
+  /* Ohut harmaa reuna */
+  background-color: #f9f9f9;
+  /* Vaalea taustaväri */
+  border-radius: 5px;
+  /* Pyöristetyt reunat */
 }
 
 /* ChatTerminalin tyylit */
 .chatterminal {
-  flex: 1; /* Komponentti vie tilaa tasaisesti flex-kontissa */
+  flex: 1;
+  /* Komponentti vie tilaa tasaisesti flex-kontissa */
   padding: 10px;
-  border: 1px solid #ccc; /* Ohut harmaa reuna */
-  background-color: #f1f1f1; /* Vaalea taustaväri */
-  border-radius: 5px; /* Pyöristetyt reunat */
+  border: 1px solid #ccc;
+  /* Ohut harmaa reuna */
+  background-color: #f1f1f1;
+  /* Vaalea taustaväri */
+  border-radius: 5px;
+  /* Pyöristetyt reunat */
 }

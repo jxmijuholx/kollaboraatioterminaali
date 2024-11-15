@@ -1,3 +1,4 @@
+```mermaid
 sequenceDiagram
     participant U as Käyttäjä
     participant C as Verkkosivusto
@@ -23,4 +24,4 @@ sequenceDiagram
     P->>WS: Vahvistaa irrottautuminen
     WS->>C: Lähettää viestin käyttäjän irrottautumisesta
     C->>U: Näyttää irrottautumisviestin
-
+```
