@@ -1,17 +1,17 @@
 ### Register a new user
-POST http://localhost:8080/auth/register
+POST https://kollabterm.fly.dev/auth/register
 Content-Type: application/json
 
 {
-    "username": "jamipelaa",
-    "password": "6969"
+    "username": "LOL1",
+    "password": "LOL"
 }
 
 ### Login with the newly registered user
-POST http://localhost:8080/auth/login
+POST https://kollabterm.fly.dev/auth/login
 Content-Type: application/json
 
 {
-    "username": "jamipelaa",
-    "password": "6969"
+    "username": "LOL1",
+    "password": "LOL"
 }
