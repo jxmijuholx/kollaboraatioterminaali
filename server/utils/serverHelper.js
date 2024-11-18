@@ -4,7 +4,7 @@ const path = require('path');
 const clients = new Map();
 const games = new Map();
 
-function getRandomName(){
+function getRandomName() {
 
     const names_file_path = path.join(__dirname, 'random_names.txt');
     const file_content = fs.readFileSync(names_file_path, 'utf8');
@@ -170,7 +170,7 @@ function updateGameState() {
             const ball = game.state.ball;
             ball.x += ball.dx * BALL_SPEED;
             ball.y += ball.dy * BALL_SPEED;
-            
+
             // Ylä- ja alareunoihin törmäys
             if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
                 ball.dy *= -1;
@@ -208,14 +208,14 @@ function updateGameState() {
                     //     " " +
                     //     LEFT_PADDLE_POS_Y
                     // );
-                    
-                     // Lasketaan osumakohdan suhteellinen sijainti mailan korkeuteen
-                     const relativeIntersectY = (ball.y - LEFT_PADDLE_POS_Y) / PADDLE_HEIGHT;
 
-                     // Asetetaan uusi suunta suhteessa osumakohtaan
-                     const normalizedIntersectY = 2 * relativeIntersectY - 1; // Skaalataan -1 (yläosa) ja 1 (alaosa) välillä
-                     ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Suunta Y-akselilla suhteessa X-akselin nopeuteen
- 
+                    // Lasketaan osumakohdan suhteellinen sijainti mailan korkeuteen
+                    const relativeIntersectY = (ball.y - LEFT_PADDLE_POS_Y) / PADDLE_HEIGHT;
+
+                    // Asetetaan uusi suunta suhteessa osumakohtaan
+                    const normalizedIntersectY = 2 * relativeIntersectY - 1; // Skaalataan -1 (yläosa) ja 1 (alaosa) välillä
+                    ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Suunta Y-akselilla suhteessa X-akselin nopeuteen
+
 
 
                     ball.dx = -ball.dx; // Käännä pallon X-akselin liikesuunta
@@ -226,12 +226,12 @@ function updateGameState() {
                 }
             }
 
-             // Ylä- ja alareunoihin törmäys
-             if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
+            // Ylä- ja alareunoihin törmäys
+            if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
                 ball.dy *= -1;
             }
 
-          
+
             // Törmäys oikean mailan kanssa
             if (ball.x + ball.radius >= RIGHT_PADDLE_POS_X) { // Pallon oikea reuna osuu mailan vasempaan reunaan
                 if (
@@ -255,7 +255,7 @@ function updateGameState() {
                     // Asetetaan uusi suunta suhteessa osumakohtaan
                     const normalizedIntersectY = 2 * relativeIntersectY - 1; // Skaalataan -1 (yläosa) ja 1 (alaosa) välillä
                     ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Suunta Y-akselilla suhteessa X-akselin nopeuteen
-                    
+
                     ball.dx = -ball.dx; // Käännä pallon X-akselin liikesuunta
             
     
@@ -267,8 +267,8 @@ function updateGameState() {
                 }
             }
 
-             // Ylä- ja alareunoihin törmäys
-             if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
+            // Ylä- ja alareunoihin törmäys
+            if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
                 ball.dy *= -1;
             }
 
@@ -299,11 +299,11 @@ function updateGameState() {
                 };
             }
 
-              // Lisää mailojen tiedot game.state tilaan
-              game.state.paddles = {
+            // Lisää mailojen tiedot game.state tilaan
+            game.state.paddles = {
                 left: {
                     x: LEFT_PADDLE_POS_X,
-                    y: LEFT_PADDLE_POS_Y, 
+                    y: LEFT_PADDLE_POS_Y,
                     width: PADDLE_WIDTH,
                     height: PADDLE_HEIGHT,
                     thickness: PADDLE_THICKNESS
@@ -318,12 +318,12 @@ function updateGameState() {
             };
 
 
-             // Pelikanvasin tiedot
-             game.state.canvas = {
+            // Pelikanvasin tiedot
+            game.state.canvas = {
                 width: CANVAS_WIDTH,
                 height: CANVAS_HEIGHT
             };
-            
+
 
             const gameState = {
                 id: game.id,
