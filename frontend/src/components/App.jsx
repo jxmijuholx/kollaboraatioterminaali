@@ -37,8 +37,7 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-   //  const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
-   const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
+    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
 
 
     // Receive messages from websocket and print them into the console
@@ -237,6 +236,23 @@ function App() {
     };
   }, [clientId, gameID, ws]);
 
+
+
+  const isReady = () => {
+    console.log("valmiina");
+
+    if (clientId && gameID && ws && ws.readyState === WebSocket.OPEN) {
+      const payload = {
+        "action": "ready",
+        "clientID": clientId,
+        "gameID": gameID
+      }
+      ws.send(JSON.stringify(payload))
+      // console.log("Player: " + clientId + " moved paddle " + direction)
+    }
+  }
+
+
   return (
     <>
 
@@ -369,6 +385,11 @@ function App() {
                   variant="contained"
                   onClick={(e) => exitTerminal()}>
                   Exit
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={isReady}>
+                  Ready
                 </Button>
               </div>
 

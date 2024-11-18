@@ -31,6 +31,15 @@ function createGame(result, connection) {
         games.set(gameID, game);
         clients.set(clientID, { connection, username });
         console.log(games)
+
+        //score suora lisääminen
+        game.state.score = {left : 0 , right: 0};
+
+        
+        
+        game.state.ready = {left: false,right: false};
+
+
         const payload = {
             action: "create",
             game: {
@@ -143,7 +152,7 @@ function updateGameState() {
             let LEFT_PADDLE_POS_X = 0;
             let RIGHT_PADDLE_POS_X = CANVAS_WIDTH - PADDLE_WIDTH;
 
-            let SCORE = false;
+           
 
 
             if (!game.state.ball) {
@@ -181,6 +190,7 @@ function updateGameState() {
             LEFT_PADDLE_POS_Y = p1_INT * PADDLE_HEIGHT ;
             RIGHT_PADDLE_POS_Y = p2_INT * PADDLE_HEIGHT ;
           
+            let SCORE = false;
 
             // Törmäys vasemman mailan kanssa
             if (ball.x - ball.radius <= LEFT_PADDLE_POS_X + PADDLE_WIDTH) { // Pallon vasen reuna osuu mailan oikeaan reunaan
@@ -209,9 +219,10 @@ function updateGameState() {
 
 
                     ball.dx = -ball.dx; // Käännä pallon X-akselin liikesuunta
-                    SCORE = false;
                 } else {
                     SCORE = true; // Pallo ohittaa mailan
+                    game.state.score.right +=1;
+                    // console.log(`oikee pelaaja scoree! score yhteensä ${game.state.score.left}-${game.state.score.right}`);
                 }
             }
 
@@ -247,9 +258,12 @@ function updateGameState() {
                     
                     ball.dx = -ball.dx; // Käännä pallon X-akselin liikesuunta
             
-                    SCORE = false;
+    
                 } else {
                     SCORE = true; // Pallo ohittaa mailan
+                    game.state.score.left += 1;
+                    // console.log(`vasen pelaaja scoree! score yhteensä: ${game.state.score.left}-${game.state.score.right}`);
+
                 }
             }
 
@@ -266,6 +280,23 @@ function updateGameState() {
                 ball.dx = BALL_START_X_DIR;
                 ball.dy = BALL_START_Y_DIR;
                 SCORE = false;
+            }
+
+            // jos pelaaja ei valmis aseta score 0 ja pallon sijaiti keskelle
+            if(game.state.ready.left ==false){
+                game.state.score = {
+                    left: 0,
+                    right: 0
+                }
+
+                game.state.ball = {
+                    x: BALL_START_X,
+                    y: BALL_START_Y,
+                    dx: BALL_START_X_DIR,
+                    dy: BALL_START_Y_DIR,
+                    speed: BALL_SPEED,
+                    radius: BALL_RADIUS
+                };
             }
 
               // Lisää mailojen tiedot game.state tilaan
@@ -286,6 +317,7 @@ function updateGameState() {
                 }
             };
 
+
              // Pelikanvasin tiedot
              game.state.canvas = {
                 width: CANVAS_WIDTH,
@@ -301,7 +333,14 @@ function updateGameState() {
 
             const payload = {
                 action: "update",
-                game: gameState
+                game: {
+                    id: game.id,
+                    clients: game.clients,
+                    state: {
+                        ...game.state,
+                        score: game.state.score
+                    }
+                }
             };
 
             game.clients.forEach(c => {
@@ -311,7 +350,7 @@ function updateGameState() {
                 }
             });
         });
-        setTimeout(updateGameState, 20);
+        setTimeout(updateGameState, 50);
     } catch (error) {
         console.error('Error updating game state:', error.message);
     }
@@ -419,6 +458,108 @@ function movePaddle(result) {
     }
 }
 
+function playerReady(result) {
+
+
+    try {
+        // console.log(result);
+
+        const { clientID, gameID, username, action } = result;
+
+        // Varmistetaan, että action on oikea
+        if (action !== 'ready') {
+            throw new Error("Invalid action");
+        }
+
+        // Haetaan peli
+        const game = games.get(gameID);
+        if (!game) {
+            throw new Error(`Game with ID ${gameID} not found`);
+        }
+
+        // Varmistetaan, että state.ready on alustettu
+        if (!game.state.ready) {
+            game.state.ready = { left: false, right: false };
+        }
+
+        // Päivitetään ready-arvot
+        game.state.ready.left = true;
+        game.state.ready.right = true;
+
+        // console.log(`Game state updated for gameID: ${gameID}`, game.state);
+
+        // Palautetaan tilapäivityksen tiedot
+        return {
+            success: true,
+            gameID,
+            state: game.state,
+        };
+    } catch (error) {
+        console.error("Error handling game ready:", error.message);
+
+        // Palautetaan virheviesti tarvittaessa
+        return {
+            success: false,
+            error: error.message,
+        };
+    }
+    
+
+    // try {
+    //     const { gameID, clientID, direction } = result;
+
+    //     if (!gameID || !clientID) throw new Error("Missing game ID or client ID");
+
+    //     const game = games.get(gameID);
+    //     if (!game) throw new Error("Game not found");
+
+    //     // Initialize client state if not already set
+    //     if (!game.state[clientID]) {
+    //         game.state[clientID] = { position: 4 }; // Default position is the middle
+    //     }
+
+    //     // Adjust paddle position based on direction
+    //     if (direction === 'down') {
+    //         game.state[clientID].position = Math.min(game.state[clientID].position + 1, 9);
+    //     } else if (direction === 'up') {
+    //         game.state[clientID].position = Math.max(game.state[clientID].position - 1, 0);
+    //     } else {
+    //         throw new Error("Invalid direction for paddle movement");
+    //     }
+
+    //     console.log(`Player ${clientID} moved ${direction}. New position: ${game.state[clientID].position}`);
+
+    //     // Prepare payload to update all clients
+    //     const payload = {
+    //         action: "update",
+    //         game: {
+    //             id: gameID,
+    //             clients: game.clients,
+    //             state: game.state
+    //         }
+    //     };
+
+    //     // Notify all clients in the game about the updated state
+    //     game.clients.forEach(c => {
+    //         const clientConnection = clients.get(c.clientID).connection;
+    //         if (clientConnection && clientConnection.connected) {
+    //             clientConnection.send(JSON.stringify(payload));
+    //         }
+    //     });
+    // } catch (error) {
+    //     console.error('Error moving paddle:', error.message);
+
+    //     const clientConnection = clients.get(result.clientID)?.connection;
+    //     if (clientConnection) {
+    //         clientConnection.send(JSON.stringify({
+    //             action: "error",
+    //             message: error.message
+    //         }));
+    //     }
+    // }
+}
+
+
 
 function cleanupEmptyGames(clientID) {
     games.forEach((game, gameID) => {
@@ -441,4 +582,5 @@ module.exports = {
     cleanupEmptyGames,
     clients,
     games,
+    playerReady,
 };
