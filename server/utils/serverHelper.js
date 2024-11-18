@@ -382,9 +382,9 @@ function movePaddle(result) {
         }
 
         // Adjust paddle position based on direction
-        if (direction === 'up') {
+        if (direction === 'down') {
             game.state[clientID].position = Math.min(game.state[clientID].position + 1, 9);
-        } else if (direction === 'down') {
+        } else if (direction === 'up') {
             game.state[clientID].position = Math.max(game.state[clientID].position - 1, 0);
         } else {
             throw new Error("Invalid direction for paddle movement");
