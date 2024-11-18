@@ -25,9 +25,6 @@
 
 </a>
 
-  
-
-  
 
 <h3  align="center">Kollabterm</h3>
 
@@ -159,11 +156,11 @@ Kollabterm is a terminal and web based version of the classic Pong game that is 
 
 ### Features
 
-- Real time Pong game with a friend
+ Real time Pong game with a friend
 
-- User creation and login
+User creation and login
 
-- Terminal based chat with your opponent
+Terminal based chat with your opponent
 
 <p  align="right">(<a  href="#readme-top">back to top</a>)</p>
 
@@ -171,15 +168,15 @@ Kollabterm is a terminal and web based version of the classic Pong game that is 
 
 ### Built With
 
-- React
+ React
 
-- Node.js
+ Node.js
 
-- Express
+ Express
 
-- WebSockets
+ WebSockets
 
-- MongoDB
+ MongoDB
 
   
 
