@@ -19,7 +19,6 @@ function createGame(result, connection) {
         const clientID = result.clientID;
         const username = result.username;
         const gameID = getRandomName();
-        const gameID = getRandomName();
 
         const game = {
             id: gameID,
