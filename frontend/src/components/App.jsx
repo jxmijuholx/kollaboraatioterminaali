@@ -1,7 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import LinkIcon from "@mui/icons-material/Link";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import { Button, Card, CardContent, FormControl, Grid2, InputLabel, MenuItem, Select, Snackbar, TextField, Typography } from '@mui/material';
+import { Button, Card, CardContent, Grid2, Snackbar, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../App.css';
@@ -332,43 +331,6 @@ function App() {
                   handleLobbyOpen
               }}
                 color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
-            </CardContent>
-          </Card>
-        </Grid2>
-
-        <Grid2 xs={12} sm={6} md={3}>
-          <Card style={{ height: 300, width: 250, background: "gray" }}>
-            <CardContent>
-              <Typography variant='h5'>Play local</Typography>
-              <Typography
-                variant='body1'
-                style={{ marginTop: 15 }}
-              >
-                Create a local game to play single player against a bot. Choose bot difficulty below.
-              </Typography>
-              <FormControl fullWidth style={{ marginTop: 15 }}>
-                <InputLabel id="difficulty-input-label">Choose difficulty</InputLabel>
-                <Select
-                  labelId='difficulty-input-label'
-                  id='difficulty-select'
-                  label='Choose difficulty'
-                  value={difficulty}
-                  onChange={handleDifficultyChange}
-                >
-                  <MenuItem value={10}>Easy</MenuItem>
-                  <MenuItem value={20}>Medium</MenuItem>
-                  <MenuItem value={30}>Hard</MenuItem>
-                  <MenuItem value={40}>Impossible, Good Luck!</MenuItem>
-                </Select>
-              </FormControl>
-              <Button
-                onClick={handleOpen}
-                color='success'
-                variant='contained'
-                style={{ marginTop: 15 }}>
-                Play locally
-                <SmartToyIcon />
-              </Button>
             </CardContent>
           </Card>
         </Grid2>

@@ -1,6 +1,6 @@
 
+import { AppBar, Box, Button, TextField, Toolbar, Typography } from '@mui/material';
 import '../App.css';
-import { AppBar, Typography, Button, TextField, Box, Toolbar } from '@mui/material';
 
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -182,7 +182,7 @@ function Home() {
                 <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Box style={{ flexGrow: 2 }}></Box>
                     <Typography variant='h4' align='center'>
-                        Collaboration terminal (Change name?)
+                        Kollabterm
                     </Typography>
                     <Box style={{ flexGrow: 1 }} display="flex" justifyContent="flex-end" >
                         {loggedIn ?
