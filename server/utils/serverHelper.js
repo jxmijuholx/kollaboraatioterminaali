@@ -1,13 +1,24 @@
-const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
 const clients = new Map();
 const games = new Map();
+
+function getRandomName() {
+
+    const names_file_path = path.join(__dirname, 'random_names.txt');
+    const file_content = fs.readFileSync(names_file_path, 'utf8');
+    const names = file_content.split('\n').map(name => name.trim()).filter(name => name)
+    const random = Math.floor(Math.random() * names.length);
+    return names[random];
+
+}
 
 function createGame(result, connection) {
     try {
         const clientID = result.clientID;
         const username = result.username;
-        const gameID = uuidv4();
+        const gameID = getRandomName();
 
         const game = {
             id: gameID,
@@ -114,21 +125,23 @@ function updateGameState() {
 
 
             const CANVAS_HEIGHT = 400;
-            const CANVAS_WITH = 600;
+            const CANVAS_WIDTH = 600;
 
-            const BALL_START_X = CANVAS_WITH / 2;
+            const BALL_START_X = CANVAS_WIDTH / 2;
             const BALL_START_Y = CANVAS_HEIGHT / 2;
             const BALL_START_X_DIR = Math.random() < 0.5 ? 1 : -1;
             const BALL_START_Y_DIR = Math.random() < 0.5 ? 1 : -1;
-            const BALL_SPEED = 4; // HUOM! laita parillinen luku :] muuten hajoaa
+            const BALL_SPEED = 4;
+            const PADDLE_HEIGHT = 40;
 
-            const PADDLE_HEIGHT = 50;
-
+            const PADDLE_WIDTH = 10;
+            const PADDLE_THICKNESS = 10;
+            const BALL_RADIUS = 10;
             let LEFT_PADDLE_POS_Y = 4;
             let RIGHT_PADDLE_POS_Y = 4;
 
             let LEFT_PADDLE_POS_X = 0;
-            let RIGHT_PADDLE_POS_X = 600;
+            let RIGHT_PADDLE_POS_X = CANVAS_WIDTH - PADDLE_WIDTH;
 
             let SCORE = false;
 
@@ -139,7 +152,8 @@ function updateGameState() {
                     y: BALL_START_Y,
                     dx: BALL_START_X_DIR,
                     dy: BALL_START_Y_DIR,
-                    speed: BALL_SPEED
+                    speed: BALL_SPEED,
+                    radius: BALL_RADIUS
                 };
             }
 
@@ -153,44 +167,95 @@ function updateGameState() {
                 ball.dy *= -1;
             }
 
-            // Pelaajien positioiden haku
-            const playerPositionsInt = Object.entries(game.state)
-                .filter(([key]) => key !== "ball")
-                .map(([clientID, clientData]) => clientData.position);
+            // Hae kaikki state-objektin avain-arvoparit listana
+            const stateEntries = Object.entries(game.state);
 
-            // Pelaajien positiot int arvoina 0- 8 välillä
-            const p1_INT = playerPositionsInt[0] || 0;
-            const p2_INT = playerPositionsInt[1] || 0;
+            // Ota viimeiset kaksi itemiä listasta
+            const lastTwoEntries = stateEntries.slice(-2);
+
+            // Hae position-arvot kummastakin itemistä
+            const p1_INT = lastTwoEntries[0]?.[1]?.position || 0; // Ensimmäinen viimeisistä
+            const p2_INT = lastTwoEntries[1]?.[1]?.position || 0; // Toinen viimeisistä
 
             //Skaalataan int positio kolladereita varten -> Näiden muuttelu pitää tehdä myös frontendissä
             LEFT_PADDLE_POS_Y = p1_INT * PADDLE_HEIGHT;
             RIGHT_PADDLE_POS_Y = p2_INT * PADDLE_HEIGHT;
 
+
             // Törmäys vasemman mailan kanssa
-            //Eka tarkistetaan x akseli ja sitten y akseli mailan kanssa ja mailan pituus huomioiden
-            if (ball.x == LEFT_PADDLE_POS_X) {
-                if (ball.y <= LEFT_PADDLE_POS_Y + PADDLE_HEIGHT && ball.y >= LEFT_PADDLE_POS_Y - PADDLE_HEIGHT) {
-                    ball.dx = -ball.dx;
+            if (ball.x - ball.radius <= LEFT_PADDLE_POS_X + PADDLE_WIDTH) { // Pallon vasen reuna osuu mailan oikeaan reunaan
+                if (
+                    ball.y + ball.radius >= LEFT_PADDLE_POS_Y && // Pallon alaosa osuu mailan yläreunaan
+                    ball.y - ball.radius <= LEFT_PADDLE_POS_Y + PADDLE_HEIGHT // Pallon yläosa osuu mailan alareunaan
+                ) {
+                    // console.log(
+                    //     "Left paddle hit: Ball " +
+                    //     ball.x +
+                    //     " " +
+                    //     ball.y +
+                    //     " Paddle Left " +
+                    //     LEFT_PADDLE_POS_X +
+                    //     " " +
+                    //     LEFT_PADDLE_POS_Y
+                    // );
+
+                    // Lasketaan osumakohdan suhteellinen sijainti mailan korkeuteen
+                    const relativeIntersectY = (ball.y - LEFT_PADDLE_POS_Y) / PADDLE_HEIGHT;
+
+                    // Asetetaan uusi suunta suhteessa osumakohtaan
+                    const normalizedIntersectY = 2 * relativeIntersectY - 1; // Skaalataan -1 (yläosa) ja 1 (alaosa) välillä
+                    ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Suunta Y-akselilla suhteessa X-akselin nopeuteen
+
+
+
+                    ball.dx = -ball.dx; // Käännä pallon X-akselin liikesuunta
                     SCORE = false;
                 } else {
-                    SCORE = true;
-                    // console.log(ball.x + " " + ball.y+" vasenmaila "+LEFT_PADDLE_POS_X +" "+LEFT_PADDLE_POS_Y +" Oikeamaila "+RIGHT_PADDLE_POS_X +" "+RIGHT_PADDLE_POS_Y);
-
+                    SCORE = true; // Pallo ohittaa mailan
                 }
+            }
+
+            // Ylä- ja alareunoihin törmäys
+            if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
+                ball.dy *= -1;
             }
 
 
             // Törmäys oikean mailan kanssa
-            //Eka tarkistetaan x akseli ja sitten y akseli mailan kanssa ja mailan pituus huomioiden
-            if (ball.x == RIGHT_PADDLE_POS_X) {
-                if (ball.y <= RIGHT_PADDLE_POS_Y + PADDLE_HEIGHT && ball.y >= RIGHT_PADDLE_POS_Y - PADDLE_HEIGHT) {
-                    ball.dx = -ball.dx;
+            if (ball.x + ball.radius >= RIGHT_PADDLE_POS_X) { // Pallon oikea reuna osuu mailan vasempaan reunaan
+                if (
+                    ball.y + ball.radius >= RIGHT_PADDLE_POS_Y && // Pallon alaosa osuu mailan yläreunaan
+                    ball.y - ball.radius <= RIGHT_PADDLE_POS_Y + PADDLE_HEIGHT // Pallon yläosa osuu mailan alareunaan
+                ) {
+                    // console.log(
+                    //     "Right paddle hit: Ball " +
+                    //     ball.x +
+                    //     " " +
+                    //     ball.y +
+                    //     " Paddle Right " +
+                    //     RIGHT_PADDLE_POS_X +
+                    //     " " +
+                    //     RIGHT_PADDLE_POS_Y
+                    // );
+
+                    // Lasketaan osumakohdan suhteellinen sijainti mailan korkeuteen
+                    const relativeIntersectY = (ball.y - RIGHT_PADDLE_POS_Y) / PADDLE_HEIGHT;
+
+                    // Asetetaan uusi suunta suhteessa osumakohtaan
+                    const normalizedIntersectY = 2 * relativeIntersectY - 1; // Skaalataan -1 (yläosa) ja 1 (alaosa) välillä
+                    ball.dy = normalizedIntersectY * Math.abs(ball.dx); // Suunta Y-akselilla suhteessa X-akselin nopeuteen
+
+                    ball.dx = -ball.dx; // Käännä pallon X-akselin liikesuunta
+
                     SCORE = false;
                 } else {
-                    SCORE = true;
-                    // console.log(ball.x + " " + ball.y+" vasenmaila "+LEFT_PADDLE_POS_X +" "+LEFT_PADDLE_POS_Y +" Oikeamaila "+RIGHT_PADDLE_POS_X +" "+RIGHT_PADDLE_POS_Y);
-
+                    SCORE = true; // Pallo ohittaa mailan
                 }
+            }
+
+            // Ylä- ja alareunoihin törmäys
+            if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
+                ball.dy *= -1;
             }
 
             // Maali, pallo palaa keskelle
@@ -203,6 +268,29 @@ function updateGameState() {
                 SCORE = false;
             }
 
+            // Lisää mailojen tiedot game.state tilaan
+            game.state.paddles = {
+                left: {
+                    x: LEFT_PADDLE_POS_X,
+                    y: LEFT_PADDLE_POS_Y,
+                    width: PADDLE_WIDTH,
+                    height: PADDLE_HEIGHT,
+                    thickness: PADDLE_THICKNESS
+                },
+                right: {
+                    x: RIGHT_PADDLE_POS_X,
+                    y: RIGHT_PADDLE_POS_Y,
+                    width: PADDLE_WIDTH,
+                    height: PADDLE_HEIGHT,
+                    thickness: PADDLE_THICKNESS
+                }
+            };
+
+            // Pelikanvasin tiedot
+            game.state.canvas = {
+                width: CANVAS_WIDTH,
+                height: CANVAS_HEIGHT
+            };
 
 
             const gameState = {
@@ -223,7 +311,7 @@ function updateGameState() {
                 }
             });
         });
-        setTimeout(updateGameState, 1000 / 60);
+        setTimeout(updateGameState, 20);
     } catch (error) {
         console.error('Error updating game state:', error.message);
     }
@@ -285,19 +373,23 @@ function movePaddle(result) {
         const game = games.get(gameID);
         if (!game) throw new Error("Game not found");
 
-        game.state[clientID] = game.state[clientID] || { position: 4 };
-
-        //muutettu asteikko 0 ja 8 välille selkeyden vuoksi
-        if (direction === 'up') {
-            game.state[clientID].position = Math.min(game.state[clientID].position + 1, 8);
-        } else if (direction === 'down') {
-            game.state[clientID].position = Math.max(game.state[clientID].position - 1, 0);
-        } else {
-            throw new Error("Unknown direction");
+        // Initialize client state if not already set
+        if (!game.state[clientID]) {
+            game.state[clientID] = { position: 4 }; // Default position is the middle
         }
 
-        // console.log(`Player ${clientID} moved ${direction}. New position: ${game.state[clientID].position}`);
+        // Adjust paddle position based on direction
+        if (direction === 'down') {
+            game.state[clientID].position = Math.min(game.state[clientID].position + 1, 9);
+        } else if (direction === 'up') {
+            game.state[clientID].position = Math.max(game.state[clientID].position - 1, 0);
+        } else {
+            throw new Error("Invalid direction for paddle movement");
+        }
 
+        console.log(`Player ${clientID} moved ${direction}. New position: ${game.state[clientID].position}`);
+
+        // Prepare payload to update all clients
         const payload = {
             action: "update",
             game: {
@@ -307,6 +399,7 @@ function movePaddle(result) {
             }
         };
 
+        // Notify all clients in the game about the updated state
         game.clients.forEach(c => {
             const clientConnection = clients.get(c.clientID).connection;
             if (clientConnection && clientConnection.connected) {
@@ -315,81 +408,16 @@ function movePaddle(result) {
         });
     } catch (error) {
         console.error('Error moving paddle:', error.message);
-    }
-}
 
-/*
-function updateBallPosition(gameID) {
-    const game = games.get(gameID)
-    if (!game) return console.log("ei palloa");
-
-// pallo pelin alussa
-
-if (!game.state.ball) {
-    game.state.ball = {
-        x: 300, 
-        y: 200, 
-        dx: 2, 
-        dy: 2   
-    };
-}
-    const ball = game.state.ball;
-
-    // päivitä pallo lokaatio
-
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    // kolliisio ylä ja alareunan kanssa
-
-    if (ball.y <= 0 || ball.y >= 400) {  
-        ball.dy = -ball.dy;  // pallo vaihtaa suuntaa osumasta
-    }
-
-    // maila lokaatiot 
-    const leftPaddle = game.state[game.clients[0].clientID].position;
-    const rightPaddle = game.state[game.clients[1].clientID].position;
-
-     // kolliisio vasemman mailaan kanssa
-     if (
-        ball.x <= 20 &&  
-        ball.y >= leftPaddle &&
-        ball.y <= leftPaddle + 100  // 100 maila korkeus
-    ) {
-        ball.dx = -ball.dx;  // vaihda pallon suunta
-    }
-
-    // kolliisio oikean mailan kanssa
-    if (
-        ball.x >= 580 &&  
-        ball.y >= rightPaddle &&
-        ball.y <= rightPaddle + 100 // mailan korkeus
-    ) {
-        ball.dx = -ball.dx; // pallon suunta
-    }
-
-    console.log(`Ball position: x=${ball.x}, y=${ball.y}, dx=${ball.dx}, dy=${ball.dy}`);
-
-
-    const payload = {
-        action: "update",
-        game: {
-            id: gameID,
-            clients: game.clients,
-            state: game.state
+        const clientConnection = clients.get(result.clientID)?.connection;
+        if (clientConnection) {
+            clientConnection.send(JSON.stringify({
+                action: "error",
+                message: error.message
+            }));
         }
-    };
-
-    game.clients.forEach(c => {
-        const clientConnection = clients.get(c.clientID).connection;
-        if (clientConnection && clientConnection.connected) {
-            clientConnection.send(JSON.stringify(payload));
-        }
-    });
-
+    }
 }
-*/
-
 
 
 function cleanupEmptyGames(clientID) {
