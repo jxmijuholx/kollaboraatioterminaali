@@ -37,8 +37,8 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-    // const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
-    const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
+   //  const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+   const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
 
 
     // Receive messages from websocket and print them into the console

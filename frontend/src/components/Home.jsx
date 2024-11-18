@@ -1,5 +1,6 @@
+
+import { AppBar, Box, Button, TextField, Toolbar, Typography } from '@mui/material';
 import '../App.css';
-import { AppBar, Typography, Button, TextField, Box, Toolbar, List, ListItem } from '@mui/material';
 
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
@@ -135,23 +136,9 @@ function Home() {
                     marginBottom: 20,
                     minWidth: '1200px'
                 }}>
-                <Toolbar style={{ display: 'flex', justifyContent: 'space-evenly' }}>
-                    {location.pathname === "/play" ?
-                        <Box style={{ flexGrow: 1 }}>
-                            <Link to={'/'}>
-                                <Button
-                                    variant='contained'
-                                    color='primary'
-                                    justifyContentent='flex-start'
-                                >
-                                    Back to home
-                                </Button>
-                            </Link>
-                        </Box>
-                        :
-                        <Box style={{ flexGrow: 1 }}></Box>
-                    }
-                    <Typography variant='h4'>
+                <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Box style={{ flexGrow: 2 }}></Box>
+                    <Typography variant='h4' align='center'>
                         Kollabterm
                     </Typography>
                     <Box flexGrow={1} display="flex" justifyContent="flex-end" >

@@ -5,7 +5,7 @@ describe('Kollaboraatioterminaali', () => {
     test('Etusivu aukeaa', async ({ page }) => {
         await page.goto('https://kollabterm.fly.dev/');
         expect(await page.title()).toBe('Collaboration terminal');
-        expect (await page.locator('text=Collaboration terminal (Change name?)').isVisible()).toBeTruthy();
+        expect (await page.locator('text=Kollabterm').isVisible()).toBeTruthy();
     });
 
     test('Käyttäjä voi kirjautua sisään', async ({ page }) => {

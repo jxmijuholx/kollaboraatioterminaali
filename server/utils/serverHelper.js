@@ -1,13 +1,24 @@
-const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
 const clients = new Map();
 const games = new Map();
+
+function getRandomName(){
+
+    const names_file_path = path.join(__dirname, 'random_names.txt');
+    const file_content = fs.readFileSync(names_file_path, 'utf8');
+    const names = file_content.split('\n').map(name => name.trim()).filter(name => name)
+    const random = Math.floor(Math.random() * names.length);
+    return names[random];
+
+}
 
 function createGame(result, connection) {
     try {
         const clientID = result.clientID;
         const username = result.username;
-        const gameID = uuidv4();
+        const gameID = getRandomName();
 
         const game = {
             id: gameID,
