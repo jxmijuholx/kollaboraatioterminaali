@@ -22,6 +22,8 @@ function Home() {
 
     const location = useLocation();
 
+    const buttonVariant = loggedIn ? 'shiny' : 'outlined'
+
     const loginLink = 'https://kollabterm.fly.dev/auth/login'
     const registerLink = 'https://kollabterm.fly.dev/auth/register'
 
@@ -135,17 +137,33 @@ function Home() {
                     marginBottom: 20,
                     minWidth: '1200px'
                 }}>
-                <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Box style={{ flexGrow: 2 }}></Box>
-                    <Typography variant='h4' align='center'>
-                        Kollabterm
-                    </Typography>
-                    <Box flexGrow={1} display="flex" justifyContent="flex-end" >
+                <Toolbar style={{ display: 'flex', alignItems: 'center' }}>
+                    {location.pathname === "/play" ?
+                        <Box flex={1} display='flex' justifyContent='flex-start'>
+                            <Link to={'/'}>
+                                <Button
+                                    variant='contained'
+                                    color='primary'
+                                >
+                                    Back to home
+                                </Button>
+                            </Link>
+                        </Box>
+                        :
+                        <Box flex={1} display='flex' justifyContent='flex-start'></Box>
+                    }
+                    <Box flex={1} display='flex' justifyContent='center'>
+                        <Typography variant='h4'>
+                            Kollabterm
+                        </Typography>
+                    </Box>
+                    <Box flex={1} display='flex' justifyContent='flex-end' >
                         {loggedIn ?
                             <Link to={"/"}>
                                 <Button
                                     variant='outlined'
-                                    onClick={handleLogout}>
+                                    onClick={handleLogout}
+                                >
                                     Log out
                                     <LogoutIcon />
                                 </Button>
@@ -178,7 +196,7 @@ function Home() {
                             {username ? "Welcome " + username + "!" : "Choose display name!"}
                         </Typography>
                         <TextField
-                            label='Type display name...'
+                            label='Type display name..'
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             sx={{ marginBottom: 2, width: '100%' }}
@@ -204,8 +222,7 @@ function Home() {
                                 to='/play'
                             >
                                 <Button
-                                    variant='contained'
-                                    color='success'
+                                    variant={buttonVariant}
                                     disabled={!loggedIn}
                                 >
                                     Start playing!

@@ -71,6 +71,9 @@ function handleMessage(message, connection, clientID, username) {
             case 'handleBalls':
                 serverHelper.updateBallPosition(result);
                 break;
+            case 'ready':
+                serverHelper.playerReady(result);
+                break;
             default:
                 throw new Error("Unknown action: " + result.action);
         }

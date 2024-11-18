@@ -20,8 +20,11 @@ function App() {
   const [lobbyOpen, setLobbyOpen] = useState(false);
   const [gameID, setGameID] = useState("");
   const [newGameId, setNewGameId] = useState(null);
+  const [clicked, setClicked] = useState(false);
 
-  const username = localStorage.getItem('username')
+  const username = localStorage.getItem('username');
+  const createButtonVariant = clientId && !gameID ? 'shiny' : 'contained';
+  const joinButtonVariant = clientId && gameID && !clicked ? 'shiny' : 'contained';
 
   //Terminaalia varten
   const [isLobbyVisible, setIsLobbyVisible] = useState(false);
@@ -37,8 +40,8 @@ function App() {
     const parsed = JSON.parse(storedToken);
     const token = parsed.token
 
-   //  const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
-   const newWs = new WebSocket(`ws://localhost:8080?token=${token}`);
+    const newWs = new WebSocket(`wss://kollabterm.fly.dev/ws?token=${token}`);
+    
 
 
     // Receive messages from websocket and print them into the console
@@ -60,6 +63,7 @@ function App() {
           setNewGameId(response.game.id);
           console.log("game created with id: ", response.game.id);
           localStorage.setItem("gameId", response.game.id)
+          setGameID(response.game.id);
           break;
 
         //Join game and set clients to players array
@@ -237,6 +241,23 @@ function App() {
     };
   }, [clientId, gameID, ws]);
 
+
+
+  const isReady = () => {
+    console.log("valmiina");
+
+    if (clientId && gameID && ws && ws.readyState === WebSocket.OPEN) {
+      const payload = {
+        "action": "ready",
+        "clientID": clientId,
+        "gameID": gameID
+      }
+      ws.send(JSON.stringify(payload))
+      // console.log("Player: " + clientId + " moved paddle " + direction)
+    }
+  }
+
+
   return (
     <>
 
@@ -270,7 +291,7 @@ function App() {
                 Create a new game and give the generated game ID to a player to let them join.
               </Typography>
               {newGameId ?
-                <Typography>
+                <Typography style={{ marginTop: 24 }}>
                   Created game with ID: {newGameId}
                 </Typography>
                 :
@@ -278,8 +299,7 @@ function App() {
                 </Typography>}
               <Button
                 onClick={createGame}
-                color='success'
-                variant='contained'
+                variant={createButtonVariant}
                 style={{ marginTop: 15 }}
               >
                 New game
@@ -307,79 +327,88 @@ function App() {
               />
               <Button onClick={() => {
                 joinGame(),
-                  handleLobbyOpen
+                  handleLobbyOpen,
+                  setClicked(true)
               }}
-                color='primary' variant='contained' style={{ marginTop: 15 }}>Join a game <LinkIcon /> </Button>
+                variant={joinButtonVariant}
+                style={{ marginTop: 15 }}>
+                Join a game <LinkIcon />
+              </Button>
             </CardContent>
           </Card>
         </Grid2>
       </Grid2>
-      <div className='lobbyparagraph'>
-        <p>Lobby:</p>
-        <p>
-          {players && players.length > 1 ?
-            "Player 1: " + players[0].username + ", " + players[0].paddle + " | " + " Player 2: " + players[1].username + ", " + players[1].paddle
-            :
-            "No players in lobby yet"}
-        </p>
-        {isLobbyVisible && (
-          <div>
-            <div className='movementButtons'>
-              <Button
-                onClick={moveUp}
-                color='primary'
-                variant='contained'
-                style={{ marginBottom: 10 }}>
-                Up
-              </Button>
-              <Button
-                onClick={moveDown}
-                color='primary'
-                variant='contained'
-                style={{ marginBottom: 10 }}>
-                Down
-              </Button>
-            </div>
-            <div >
-              {/* Nappien sisältämä kontti terminaalin yläpuolella */}
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
-                <Button
-                  variant="contained"
-                  onClick={() => handleButtonClick('play')}
-                  disabled={players.length < 2}>
-                  Pelaa
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => handleButtonClick('chat')}>
-                  Chat
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => handleButtonClick('clear')}>
-                  Tyhjennä
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={() => handleButtonClick('reset')}
-                  disabled={players.length < 2}>
-                  Reset
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={(e) => exitTerminal()}>
-                  Exit
-                </Button>
-              </div>
-
-              {/* Terminaalikontti */}
-
-              {isTerminalVisible && <ChatTerminal username={localStorage.getItem("username")} sendMessage={sendMessage} action={action} viesti={viesti} />}
-              {isGameVisible && <GameCanvas pelitila={pelitila} />}
-            </div>
+      {isLobbyVisible && (
+        <div>
+          <div className='lobbyparagraph'>
+            <p>Lobby:</p>
+            <p>
+              {players && players.length > 1 ?
+                "Player 1: " + players[0].username + ", " + players[0].paddle + " | " + " Player 2: " + players[1].username + ", " + players[1].paddle
+                :
+                `Wait for other player to join and then press "Ready"`}
+            </p>
           </div>
-        )}
-      </div>
+          <div className='movementButtons'>
+            <Button
+              onClick={moveUp}
+              variant='contained'
+              style={{ marginBottom: 10 }}>
+              Up
+            </Button>
+            <Button
+              onClick={moveDown}
+              variant='contained'
+              style={{ marginBottom: 10 }}>
+              Down
+            </Button>
+          </div>
+          <div >
+            {/* Nappien sisältämä kontti terminaalin yläpuolella */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '10px' }}>
+              <Button
+                variant="contained"
+                onClick={() => handleButtonClick('play')}
+                disabled={players.length < 2}>
+                Pelaa
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleButtonClick('chat')}>
+                Chat
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleButtonClick('clear')}>
+                Tyhjennä
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => handleButtonClick('reset')}
+                disabled={players.length < 2}>
+                Reset
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={isReady}
+                disabled={players.length < 2}>
+                Ready
+              </Button>
+              <Button
+                variant="contained"
+                onClick={(e) => exitTerminal()}>
+                Exit
+              </Button>
+            </div>
+
+            {/* Terminaalikontti */}
+
+            {isTerminalVisible && <ChatTerminal username={localStorage.getItem("username")} sendMessage={sendMessage} action={action} viesti={viesti} />}
+            {isGameVisible && <GameCanvas pelitila={pelitila} />}
+          </div>
+        </div>
+      )}
     </>
   );
 }

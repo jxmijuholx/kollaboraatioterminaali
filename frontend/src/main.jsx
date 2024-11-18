@@ -6,7 +6,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import Home from './components/Home';
 import Error from './components/Error'
 
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, createTheme, keyframes } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 
 const theme = createTheme({
@@ -18,7 +18,7 @@ const theme = createTheme({
     },
     text: {
       primary: '#39ff14',
-      secondary: '#39ff14'
+      secondary: '#39ff14',
     },
     primary: {
       main: '#39ff14'
@@ -41,6 +41,35 @@ const theme = createTheme({
       textTransform: 'none',
     },
   },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          fontWeight: 'bold'
+        }
+      },
+      variants: [
+        {
+          props: { variant: 'shiny' },
+          style: {
+            border: '1px solid #39ff14',
+            color: 'black',
+            backgroundColor: '#39ff14',
+            '&:hover': {
+              backgroundColor: '#2fcc10',
+              border: '1px solid #2fcc10',
+            },
+            animation: 'pulse 1.5s infinite',
+            '@keyframes pulse': {
+              '0%': { boxShadow: '0 0 5px 2px #39ff14' },
+              '50%': { boxShadow: '0 0 15px 4px #39ff14' },
+              '100%': { boxShadow: '0 0 5px 2px #39ff14' },
+            },
+          }
+        }
+      ]
+    }
+  }
 })
 
 const router = createBrowserRouter([
