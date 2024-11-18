@@ -147,7 +147,7 @@ function updateGameState() {
             const ball = game.state.ball;
             ball.x += ball.dx * BALL_SPEED;
             ball.y += ball.dy * BALL_SPEED;
-            
+
             // Ylä- ja alareunoihin törmäys
             if (ball.y == 0 || ball.y == CANVAS_HEIGHT) {
                 ball.dy *= -1;
@@ -169,28 +169,28 @@ function updateGameState() {
             // Törmäys vasemman mailan kanssa
             //Eka tarkistetaan x akseli ja sitten y akseli mailan kanssa ja mailan pituus huomioiden
             if (ball.x == LEFT_PADDLE_POS_X) {
-                if (ball.y <= LEFT_PADDLE_POS_Y +PADDLE_HEIGHT && ball.y >= LEFT_PADDLE_POS_Y - PADDLE_HEIGHT ) {
+                if (ball.y <= LEFT_PADDLE_POS_Y + PADDLE_HEIGHT && ball.y >= LEFT_PADDLE_POS_Y - PADDLE_HEIGHT) {
                     ball.dx = -ball.dx;
-                    SCORE= false;
-                }else {
-                    SCORE= true;
+                    SCORE = false;
+                } else {
+                    SCORE = true;
                     // console.log(ball.x + " " + ball.y+" vasenmaila "+LEFT_PADDLE_POS_X +" "+LEFT_PADDLE_POS_Y +" Oikeamaila "+RIGHT_PADDLE_POS_X +" "+RIGHT_PADDLE_POS_Y);
 
-                }    
+                }
             }
-           
+
 
             // Törmäys oikean mailan kanssa
             //Eka tarkistetaan x akseli ja sitten y akseli mailan kanssa ja mailan pituus huomioiden
             if (ball.x == RIGHT_PADDLE_POS_X) {
-                if (ball.y <= RIGHT_PADDLE_POS_Y +PADDLE_HEIGHT && ball.y >= RIGHT_PADDLE_POS_Y - PADDLE_HEIGHT) {
+                if (ball.y <= RIGHT_PADDLE_POS_Y + PADDLE_HEIGHT && ball.y >= RIGHT_PADDLE_POS_Y - PADDLE_HEIGHT) {
                     ball.dx = -ball.dx;
-                    SCORE= false;
-                }else {
-                    SCORE= true;
+                    SCORE = false;
+                } else {
+                    SCORE = true;
                     // console.log(ball.x + " " + ball.y+" vasenmaila "+LEFT_PADDLE_POS_X +" "+LEFT_PADDLE_POS_Y +" Oikeamaila "+RIGHT_PADDLE_POS_X +" "+RIGHT_PADDLE_POS_Y);
 
-                }   
+                }
             }
 
             // Maali, pallo palaa keskelle
@@ -203,7 +203,7 @@ function updateGameState() {
                 SCORE = false;
             }
 
-            
+
 
             const gameState = {
                 id: game.id,
