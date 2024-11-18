@@ -131,15 +131,12 @@ function updateGameState() {
             const BALL_START_Y = CANVAS_HEIGHT / 2;
             const BALL_START_X_DIR = Math.random() < 0.5 ? 1 : -1;
             const BALL_START_Y_DIR = Math.random() < 0.5 ? 1 : -1;
-            const BALL_SPEED = 4; // HUOM! laita parillinen luku :] muuten hajoaa
-
+            const BALL_SPEED = 4;
             const PADDLE_HEIGHT = 40;
 
-            const PADDLE_WIDTH = 10; // Mailan leveys
-            const PADDLE_THICKNESS = 10; // Mailan paksuus
-
-            const BALL_RADIUS = 10; // Pallon säde
-
+            const PADDLE_WIDTH = 10;
+            const PADDLE_THICKNESS = 10;
+            const BALL_RADIUS = 10;
             let LEFT_PADDLE_POS_Y = 4;
             let RIGHT_PADDLE_POS_Y = 4;
 
