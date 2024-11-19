@@ -1,9 +1,9 @@
 import LoginIcon from '@mui/icons-material/Login';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@mui/material";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import { useState } from "react";
 
 
-function Login({ open, closeLogin, handleLogin, openRegister }) {
+function Login({ open, closeLogin, handleLogin }) {
 
     //State variables
     const [username, setUsername] = useState('');
@@ -76,14 +76,6 @@ function Login({ open, closeLogin, handleLogin, openRegister }) {
                             >
                                 Login
                                 <LoginIcon />
-                            </Button>
-                            <Typography>Don't have an account yet? Create one now!</Typography>
-                            <Button
-                                variant="contained"
-                                color="secondary"
-                                onClick={openRegister}
-                            >
-                                Create account
                             </Button>
                         </DialogActions>
                     </form>

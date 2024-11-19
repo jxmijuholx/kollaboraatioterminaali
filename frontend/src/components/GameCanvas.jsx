@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState ,useEffect, useRef } from 'react';
 
 const GameCanvas = ({ pelitila }) => {
   const canvasRef = useRef(null);
@@ -42,13 +42,33 @@ const GameCanvas = ({ pelitila }) => {
     drawBall(ctx);
   }, [pelitila]);
 
+
+
   return (
+    <>
+    
+    <div style={{marginBottom: '10px' }}>
+            <h3 style={{ margin: 0 }}>Pelaajien pisteet</h3>
+
+            <div style={{ fontSize: '30px', fontWeight: 'bold' }}>
+                <span style={{ color: 'blue', marginRight: '20px' }}>
+                    {pelitila.state.score.left}
+                </span>
+                <span style={{ color: 'red' }}>
+                    {pelitila.state.score.right}
+                </span>
+            </div>
+        </div>
+
     <canvas
       ref={canvasRef}
       width={canvasWidth}
       height={canvasHeight}
       style={{ border: '1px solid white', backgroundColor: 'black' }}
     />
+
+    </>
+
   );
 };
 
