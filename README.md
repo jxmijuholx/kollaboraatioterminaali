@@ -526,7 +526,7 @@ Jami Juhola - jami.juhola01@gmail.com
 
   
 
-Your Name - email@email_client.com
+Tuukka Teilas - tuukkajteilas@gmail.com
 
   
 
