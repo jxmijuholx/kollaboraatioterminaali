@@ -530,7 +530,7 @@ Tuukka Teilas - tuukkajteilas@gmail.com
 
   
 
-Your Name - email@email_client.com
+Santeri Kuronen - kuronen011@gmail.com
 
   
 
