@@ -534,7 +534,7 @@ Santeri Kuronen - kuronen011@gmail.com
 
   
 
-Your Name - email@email_client.com
+Aleksi Keinänen - aleksi.sakari.keinanen@gmail.com
 
   
 
