@@ -1,151 +1,47 @@
-
-  
-  
-
 <a  id="readme-top"></a>
-
-  
-  
-
 <br  />
-
-  
-
 <div  align="center">
-
-  
-
 <a  href="https://github.com/jxmijuholx/kollaboraatioterminaali.git">
-
   
-
 ![logo](images/logo1.png)
-
   
-
 </a>
-
-
 <h3  align="center">Kollabterm</h3>
-
-  
-
-  
-
 <p  align="center">
-
-  
-
 Kollabterm is a terminal and web based version of the classic Pong game that is meant for people who are stuck in a gaming queue and want to do something with their friends while waiting for a game. So queue up, and take a 1v1 with your friend while waiting!
-
-  
-
 <br  />
-
-  
-
 <a  href="https://github.com/jxmijuholx/kollaboraatioterminaali.git"><strong>Explore the docs »</strong></a>
 
-  
-
-  
-
+</div>
+</br>
 <!-- TABLE OF CONTENTS -->
-
-  
-
+<div align="left" >
 <details>
-
-  
-
 <summary>Table of Contents</summary>
 
-  
-
-<ol>
-
-  
-
+<ol >
 <li>
-
-  
-
 <a  href="#about-the-project">About The Project</a>
-
-  
-
 <ul>
-
-  
-
 <li><a  href="#built-with">Built With</a></li>
-
-  
-
 </ul>
-
-  
-
 </li>
-
-  
-
 <li>
-
 <a  href="#getting-started">Getting Started</a>
-
-  
-
 <ul>
-
-  
-
 <li><a  href="#prerequisites">Prerequisites</a></li>
-
-  
-
 <li><a  href="#installation">Installation</a></li>
-
-  
-
 </ul>
-
-  
-
 </li>
-
-  
-
 <li><a  href="#usage">Usage</a></li>
-
-  
-
 <li><a  href="#contributing">Contributing</a></li>
-
-  
-
 <li><a  href="#license">License</a></li>
-
-  
-
 <li><a  href="#contact">Contact</a></li>
-
-  
-
 <li><a  href="#acknowledgments">Acknowledgments</a></li>
-
-  
-
 </ol>
-
-  
-
 </details>
-
-  
-
-  
-
+</div>
+</br>
 <!-- ABOUT THE PROJECT -->
 
   
@@ -283,10 +179,11 @@ Visit  the  frontend  localhost!
   
 
 ### Code snippets
+  <details>
+  <summary><strong>View Snippets</strong></summary>
 
   #### Register a user
 ![register](images/register.png)
-
 #### How the server handles requests
 ![handlemessage](images/handlemessage.png)
 
@@ -296,11 +193,14 @@ Visit  the  frontend  localhost!
 #### This is what making a game looks like
 ![gamelogic](images/gamelogic.png)
 
+  </details>
 
-  
+</br>
 
 #### Github Actions workflow
 
+<details>
+  <summary><strong>View workflow</strong></summary>
   
 
 ```
@@ -415,10 +315,10 @@ path: e2e-tests/playwright-report/
 retention-days: 30
 
 ```
-
+</details>
 <!-- CONTRIBUTING -->
 
-  
+  </br>
 
 ## Contributing
 
